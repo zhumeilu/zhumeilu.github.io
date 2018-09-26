@@ -580,10 +580,10 @@
     </entry>
     
     <entry>
-      <title>使用openssl生成rsa公钥和私钥</title>
-      <link href="/2018/09/26/%E4%BD%BF%E7%94%A8openssl%E7%94%9F%E6%88%90rsa%E5%85%AC%E9%92%A5%E5%92%8C%E7%A7%81%E9%92%A5/"/>
-      <url>/2018/09/26/%E4%BD%BF%E7%94%A8openssl%E7%94%9F%E6%88%90rsa%E5%85%AC%E9%92%A5%E5%92%8C%E7%A7%81%E9%92%A5/</url>
-      <content type="html"><![CDATA[<p>生成一个名为rsa_private_key.pem的私钥<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl genrsa -out rsa_private_key.pem 1024</span><br></pre></td></tr></table></figure></p><p>将私钥转换成pkcs8格式<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl pkcs8 -topk8 -nocrypt -inform PEM -in rsa_private_key.pem -outform PEM</span><br></pre></td></tr></table></figure></p><p>需要自己手动保存</p><p>生成rsa_public_key.pem公钥<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl rsa -in rsa_private_key.pem -pubout -out rsa_public_key.pem</span><br></pre></td></tr></table></figure></p>]]></content>
+      <title>linux 安装jdk</title>
+      <link href="/2018/09/26/linux%20%E5%AE%89%E8%A3%85jdk/"/>
+      <url>/2018/09/26/linux%20%E5%AE%89%E8%A3%85jdk/</url>
+      <content type="html"><![CDATA[<ul><li>使用yum 安装jdk</li><li>使用tar.gz文件解压安装jdk</li></ul><p>配置环境变量</p><p>vim /etc/profile</p><p>在尾部添加</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">JAVA_HOME=/usr/java/jdk1.8.0_60</span><br><span class="line">CLASSPATH=$JAVA_HOME/lib/</span><br><span class="line">PATH=$PATH:$JAVA_HOME/bin</span><br><span class="line">export PATH JAVA_HOME CLASSPATH</span><br></pre></td></tr></table></figure>]]></content>
       
       <categories>
           
@@ -595,10 +595,10 @@
     </entry>
     
     <entry>
-      <title>linux 安装jdk</title>
-      <link href="/2018/09/26/linux%20%E5%AE%89%E8%A3%85jdk/"/>
-      <url>/2018/09/26/linux%20%E5%AE%89%E8%A3%85jdk/</url>
-      <content type="html"><![CDATA[<ul><li>使用yum 安装jdk</li><li>使用tar.gz文件解压安装jdk</li></ul><p>配置环境变量</p><p>vim /etc/profile</p><p>在尾部添加</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">JAVA_HOME=/usr/java/jdk1.8.0_60</span><br><span class="line">CLASSPATH=$JAVA_HOME/lib/</span><br><span class="line">PATH=$PATH:$JAVA_HOME/bin</span><br><span class="line">export PATH JAVA_HOME CLASSPATH</span><br></pre></td></tr></table></figure>]]></content>
+      <title>使用openssl生成rsa公钥和私钥</title>
+      <link href="/2018/09/26/%E4%BD%BF%E7%94%A8openssl%E7%94%9F%E6%88%90rsa%E5%85%AC%E9%92%A5%E5%92%8C%E7%A7%81%E9%92%A5/"/>
+      <url>/2018/09/26/%E4%BD%BF%E7%94%A8openssl%E7%94%9F%E6%88%90rsa%E5%85%AC%E9%92%A5%E5%92%8C%E7%A7%81%E9%92%A5/</url>
+      <content type="html"><![CDATA[<p>生成一个名为rsa_private_key.pem的私钥<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl genrsa -out rsa_private_key.pem 1024</span><br></pre></td></tr></table></figure></p><p>将私钥转换成pkcs8格式<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl pkcs8 -topk8 -nocrypt -inform PEM -in rsa_private_key.pem -outform PEM</span><br></pre></td></tr></table></figure></p><p>需要自己手动保存</p><p>生成rsa_public_key.pem公钥<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl rsa -in rsa_private_key.pem -pubout -out rsa_public_key.pem</span><br></pre></td></tr></table></figure></p>]]></content>
       
       <categories>
           
