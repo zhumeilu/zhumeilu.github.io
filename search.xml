@@ -3,6 +3,95 @@
   
     
     <entry>
+      <title>使用谷歌云服务开启8080等其他的端口</title>
+      <link href="/2018/09/26/%E4%BD%BF%E7%94%A8%E8%B0%B7%E6%AD%8C%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%BC%80%E5%90%AF8080%E7%AD%89%E5%85%B6%E4%BB%96%E7%9A%84%E7%AB%AF%E5%8F%A3/"/>
+      <url>/2018/09/26/%E4%BD%BF%E7%94%A8%E8%B0%B7%E6%AD%8C%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%BC%80%E5%90%AF8080%E7%AD%89%E5%85%B6%E4%BB%96%E7%9A%84%E7%AB%AF%E5%8F%A3/</url>
+      <content type="html"><![CDATA[<p>最近使用朋友的谷歌云服务器，发现无法开启8080等一些端口，查了很多资料，也改了防火墙之类的都没有效果，最后翻墙google了一下，找到了解决方案。</p><p>登录谷歌云服务器</p><ul><li>查询所有防火墙规则<pre><code>gcloud compute firewall-rules list</code></pre></li><li>创建一个名为allow-ssr，端口号为1099的规则<pre><code>gcloud compute firewall-rules create allow-ssr --allow tcp:1099</code></pre></li><li>删除一个名为allow-ssr的防火墙规则<pre><code>gcloud compute firewall-rules delete allow-ssr</code></pre></li></ul>]]></content>
+      
+      <categories>
+          
+          <category> nginx </category>
+          
+      </categories>
+      
+      
+    </entry>
+    
+    <entry>
+      <title>nginx配置文件</title>
+      <link href="/2018/09/26/nginx%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
+      <url>/2018/09/26/nginx%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/</url>
+      <content type="html"><![CDATA[<p>nginx的启动：nginx<br>重启：nginx -s reload<br>快读关闭： nginx -s stop<br>安全关闭：nginx -s quit</p><p>nginx配置文件：</p><pre><code>server {    #监听80端口    listen       80;     #服务器的名称    server_name  localhost;     #访问日志   日志格式main需要在前面定义    access_log  logs/host.access.log  main;     #location / 代表匹配根路径下的所有资源   location后面跟一个正则表达式，用来匹配请求的资源。    location / {             #资源文件加载的根路径，一些静态资源文件，如静态的html，js，css，图片等。        root   html;         #首页默认页面        index  index.html index.htm;       }    #以jsp结尾的资源文件，proxy_pass   http://127.0.0.1代表转发给http://127.0.0.1     location ~ .*.jsp$ {        proxy_pass   http://127.0.0.1;    }    #禁止访问WEB-INF里面的文件    location ~ ^/WEB-INF/ {        deny  all;    }    # 错误404页面    #error_page  404              /404.html;    # redirect server error pages to the static page /50x.html    #服务器错误500页面    error_page   500 502 503 504  /50x.html;    location = /50x.html {        root   html;    }}      </code></pre><p>为上面这些配置文件单独命名，比如<a href="http://www.zhumeilu.me.conf" target="_blank" rel="noopener">www.zhumeilu.me.conf</a> 保存在nginx.conf同级目录或者自己创建一个子目录，然后在nginx.conf的http里面添加一行，也就是代替了原来的server{}，这样做的好处可以分开管理多个服务器</p><pre><code>include www.zhumeilu.me.conf</code></pre><p>nginx的负载均衡：<br>分配策略：</p><ul><li>轮询（默认）<br>每个请求按时间顺序逐一分配到不同的后端服务器，如果后端服务器down掉，能自动剔除。</li><li>weight<br>指定轮询几率，weight和访问比率成正比，用于后端服务器性能不均的情况。</li><li><p>ip_hash<br>每个请求按访问ip的hash结果分配，这样每个访客固定访问一个后端服务器，可以解决session的问题。  </p></li><li><p>fair<br>按后端服务器的响应时间来分配请求，响应时间短的优先分配。 </p></li><li><p>url_hash<br>按访问url的hash结果来分配请求，使每个url定向到同一个后端服务器，后端服务器为缓存时比较有效。<br>修改配置文件：</p><pre><code>#定义负载均衡设备的 ip及设备状态 upstream myServer {    server localhost:8080;  server localhost:8081;  server localhost:8082;  server localhost:8083;  ip_hash;}server { location ~ .*.jsp$ {      proxy_pass   http://myServer;  }}</code></pre></li></ul>]]></content>
+      
+      <categories>
+          
+          <category> nginx </category>
+          
+      </categories>
+      
+      
+    </entry>
+    
+    <entry>
+      <title>mysql中文乱码</title>
+      <link href="/2018/09/26/mysql%E4%B8%AD%E6%96%87%E4%B9%B1%E7%A0%81/"/>
+      <url>/2018/09/26/mysql%E4%B8%AD%E6%96%87%E4%B9%B1%E7%A0%81/</url>
+      <content type="html"><![CDATA[<ul><li>最近项目中遇到了中文乱码，一开始以为是编码过滤器没有配置好路径，接着debug后发现前天传到后天的数据没有乱码。</li><li>那么就是数据存到数据库的过程中出现了问题，我清楚的记得我创建数据库的时候指定了utf8的编码，所以应该不是这个问题。</li><li><p>那么就是连接数据库的时候出的问题了，接着百度了一下，在连接的url里面加上了两个参数useUnicode=true&amp;characterEncoding=utf-8，然后问题解决。</p><p>  //连接地址：<br>  jdbc:mysql://127.0.0.1:3306/abc?useUnicode=true&amp;characterEncoding=utf-8</p></li></ul>]]></content>
+      
+      <categories>
+          
+          <category> mysql </category>
+          
+      </categories>
+      
+      
+    </entry>
+    
+    <entry>
+      <title>mongodb学习笔记一</title>
+      <link href="/2018/09/26/mongodb%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80/"/>
+      <url>/2018/09/26/mongodb%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80/</url>
+      <content type="html"><![CDATA[<p>首先引入依赖<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">        &lt;groupId&gt;org.mongodb&lt;/groupId&gt;</span><br><span class="line">        &lt;artifactId&gt;mongodb-driver&lt;/artifactId&gt;</span><br><span class="line">        &lt;version&gt;3.6.0&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure></p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line">MongoClient mc = null;</span><br><span class="line">MongoDatabase database = null;</span><br><span class="line">MongoCollection&lt;Document&gt; collection = null;</span><br><span class="line">@Before</span><br><span class="line">public void before()&#123;</span><br><span class="line">    //建立一个连接</span><br><span class="line">    mc = new MongoClient(&quot;localhost&quot;,27017 );</span><br><span class="line">    //获取一个数据库</span><br><span class="line">    database = mc.getDatabase(&quot;mydb&quot;);</span><br><span class="line">    //获取一个集合</span><br><span class="line">    collection = database.getCollection(&quot;test&quot;);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Test</span><br><span class="line">public void insert()&#123;</span><br><span class="line">    //创建一个文档</span><br><span class="line">    Document doc = new Document(&quot;name&quot;, &quot;MongoDB&quot;)</span><br><span class="line">            .append(&quot;type&quot;, &quot;database&quot;)</span><br><span class="line">            .append(&quot;count&quot;, 1)</span><br><span class="line">            .append(&quot;versions&quot;, Arrays.asList(&quot;v3.2&quot;, &quot;v3.0&quot;, &quot;v2.6&quot;))</span><br><span class="line">            .append(&quot;info&quot;, new Document(&quot;x&quot;, 203).append(&quot;y&quot;, 102));</span><br><span class="line">    //插入一个文档</span><br><span class="line">    collection.insertOne(doc);</span><br><span class="line">&#125;</span><br><span class="line">@Test</span><br><span class="line">public void insertMany()&#123;</span><br><span class="line">    //插入多个文档</span><br><span class="line">    List&lt;Document&gt; documents = new ArrayList&lt;Document&gt;();</span><br><span class="line">    for (int i = 0; i &lt; 100; i++) &#123;</span><br><span class="line">        documents.add(new Document(&quot;i&quot;, i));</span><br><span class="line">    &#125;</span><br><span class="line">    collection.insertMany(documents);</span><br><span class="line">&#125;</span><br><span class="line">@Test</span><br><span class="line">public void count()&#123;</span><br><span class="line">    //集合长度</span><br><span class="line">    System.out.println(&quot;集合长度：&quot;+collection.count());</span><br><span class="line">&#125;</span><br><span class="line">@Test</span><br><span class="line">public  void firstQuery()&#123;</span><br><span class="line">    //获取集合第一个文档</span><br><span class="line">    Document myDoc = collection.find().first();</span><br><span class="line">    System.out.println(myDoc.toJson());</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Test</span><br><span class="line">public void allQuery()&#123;</span><br><span class="line">    //遍历集合，获取每个文档</span><br><span class="line">    MongoCursor&lt;Document&gt; cursor = collection.find().iterator();</span><br><span class="line">    try &#123;</span><br><span class="line">        while (cursor.hasNext()) &#123;</span><br><span class="line">            System.out.println(cursor.next().toJson());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">        cursor.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">@Test</span><br><span class="line">public void allQuery2()&#123;</span><br><span class="line">    //遍历集合，获取每个文档</span><br><span class="line">    //官方不推荐这种用法</span><br><span class="line">    for (Document cur : collection.find()) &#123;</span><br><span class="line">        System.out.println(cur.toJson());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">@Test</span><br><span class="line">public void allQuery3()&#123;</span><br><span class="line">    //遍历集合，获取每个文档,分页</span><br><span class="line">    //skip()方法默认参数为 0 </span><br><span class="line">    MongoCursor&lt;Document&gt; cursor = collection.find().skip(10).limit(5).iterator();</span><br><span class="line">    try &#123;</span><br><span class="line">        while (cursor.hasNext()) &#123;</span><br><span class="line">            System.out.println(cursor.next().toJson());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">        cursor.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">@Test</span><br><span class="line">public void eq()&#123;</span><br><span class="line"></span><br><span class="line">    //查询i=100的文档</span><br><span class="line">    Document myDoc = collection.find(Filters.eq(&quot;i&quot;, 100)).first();</span><br><span class="line">    System.out.println(myDoc.toJson());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Test</span><br><span class="line">public void gt()&#123;</span><br><span class="line">    //查询i&gt;50</span><br><span class="line">    Block&lt;Document&gt; printBlock = new Block&lt;Document&gt;() &#123;</span><br><span class="line">        public void apply(final Document document) &#123;</span><br><span class="line">            System.out.println(document.toJson());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    collection.find(Filters.gt(&quot;i&quot;, 50)).forEach(printBlock);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Test</span><br><span class="line">public void between()&#123;</span><br><span class="line">    //查询i&gt;=50 and i&lt;=100</span><br><span class="line">    Block&lt;Document&gt; printBlock = new Block&lt;Document&gt;() &#123;</span><br><span class="line">        public void apply(final Document document) &#123;</span><br><span class="line">            System.out.println(document.toJson());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    collection.find(Filters.and(gte(&quot;i&quot;, 50), Filters.lte(&quot;i&quot;, 100))).forEach(printBlock);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">@Test</span><br><span class="line">public void updateOne()&#123;</span><br><span class="line"></span><br><span class="line">    collection.updateOne(Filters.eq(&quot;i&quot;, 10), new Document(&quot;$set&quot;, new Document(&quot;i&quot;, 110)));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Test</span><br><span class="line">public void updateMany()&#123;</span><br><span class="line">    UpdateResult updateResult = collection.updateMany(Filters.lt(&quot;i&quot;, 100), Updates.inc(&quot;i&quot;, 100));</span><br><span class="line">    System.out.println(updateResult.getModifiedCount());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Test</span><br><span class="line">public void deleteOne()&#123;</span><br><span class="line">    collection.deleteOne(Filters.eq(&quot;i&quot;, 110));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Test</span><br><span class="line">public void deleteBetween()&#123;</span><br><span class="line">    DeleteResult deleteResult = collection.deleteMany(Filters.gte(&quot;i&quot;, 100));</span><br><span class="line">    System.out.println(deleteResult.getDeletedCount());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Test</span><br><span class="line">public void addIndex()&#123;</span><br><span class="line">    collection.createIndex(new Document(&quot;i&quot;, 1));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      
+      <categories>
+          
+          <category> mongodb </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> mongodb </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>mac下安装配置nginx</title>
+      <link href="/2018/09/26/mac%E4%B8%8B%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AEnginx/"/>
+      <url>/2018/09/26/mac%E4%B8%8B%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AEnginx/</url>
+      <content type="html"><![CDATA[<p>因为mac自带apache2的原因，所以80端口被占用，而安装的nginx默认使用8080端口。<br>因为之前安装过了homebrew，所以使用homebrew安装nginx，这样也比较方便。<br>直接在终端运行brew install nginx就可以了。默认安装完的nginx路径为/usr/local/etc/nginx，页面的加载地址为/usr/local/var/www<br>在终端运行nginx，然后nginx就启动了。<br>接着在浏览器中输入localhost:8080就可以看到nginx已经运行。</p>]]></content>
+      
+      <categories>
+          
+          <category> nginx </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Mac </tag>
+            
+            <tag> nginx </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
       <title>shardingjdbc分表分库，主从分离</title>
       <link href="/2018/09/26/shardingjdbc%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%EF%BC%8C%E4%B8%BB%E4%BB%8E%E5%88%86%E7%A6%BB/"/>
       <url>/2018/09/26/shardingjdbc%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%EF%BC%8C%E4%B8%BB%E4%BB%8E%E5%88%86%E7%A6%BB/</url>
@@ -26,7 +115,7 @@
     </entry>
     
     <entry>
-      <title>shardingjdbc分表分库，mysql主从分离</title>
+      <title>关于数据库水平拆分和垂直拆分</title>
       <link href="/2018/09/26/%E5%85%B3%E4%BA%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E6%B0%B4%E5%B9%B3%E6%8B%86%E5%88%86%E5%92%8C%E5%9E%82%E7%9B%B4%E6%8B%86%E5%88%86/"/>
       <url>/2018/09/26/%E5%85%B3%E4%BA%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E6%B0%B4%E5%B9%B3%E6%8B%86%E5%88%86%E5%92%8C%E5%9E%82%E7%9B%B4%E6%8B%86%E5%88%86/</url>
       <content type="html"><![CDATA[<p>###垂直拆分<br>垂直拆分 分为两种，一种是垂直分表，一种是垂直分库。</p><ul><li>垂直分表<br>垂直分表就是单表的列数比较多，并且有一些列存放的数据比较多，比如文章表的文章内容，或者一些列不需要经常查看的。这时可以使用垂直分表，将那些大容量的，不经常查看的列分到另一张表里面去，这样便可以增加查询的速度。</li><li>垂直分库</li></ul><p>###水平拆分</p>]]></content>

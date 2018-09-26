@@ -1,0 +1,81 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>nginx配置文件 | maylor's blogs</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/8.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">nginx配置文件</h1><a id="logo" href="/.">maylor's blogs</a><p class="description"></p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a><a href="/categories/"><i class="fa fa-archive"> 文章分类</i></a><a href="/tags/"><i class="fa fa-archive"> 标签</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">nginx配置文件</h1><div class="post-meta">Sep 26, 2018<span> | </span><span class="category"><a href="/categories/nginx/">nginx</a></span></div><div class="post-content"><p>nginx的启动：nginx<br>重启：nginx -s reload<br>快读关闭： nginx -s stop<br>安全关闭：nginx -s quit</p>
+<p>nginx配置文件：</p>
+<pre><code>server {
+    #监听80端口
+    listen       80; 
+    #服务器的名称
+    server_name  localhost; 
+
+    #访问日志   日志格式main需要在前面定义
+    access_log  logs/host.access.log  main; 
+
+    #location / 代表匹配根路径下的所有资源   location后面跟一个正则表达式，用来匹配请求的资源。
+    location / {     
+        #资源文件加载的根路径，一些静态资源文件，如静态的html，js，css，图片等。
+        root   html; 
+        #首页默认页面
+        index  index.html index.htm;   
+    }
+    #以jsp结尾的资源文件，proxy_pass   http://127.0.0.1代表转发给http://127.0.0.1
+     location ~ .*.jsp$ {
+        proxy_pass   http://127.0.0.1;
+    }
+    #禁止访问WEB-INF里面的文件
+    location ~ ^/WEB-INF/ {
+        deny  all;
+    }
+    # 错误404页面
+    #error_page  404              /404.html;
+
+    # redirect server error pages to the static page /50x.html
+    #服务器错误500页面
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   html;
+    }
+
+}      
+</code></pre><p>为上面这些配置文件单独命名，比如<a href="http://www.zhumeilu.me.conf" target="_blank" rel="noopener">www.zhumeilu.me.conf</a> 保存在nginx.conf同级目录或者自己创建一个子目录，然后在nginx.conf的http里面添加一行，也就是代替了原来的server{}，这样做的好处可以分开管理多个服务器</p>
+<pre><code>include www.zhumeilu.me.conf
+</code></pre><p>nginx的负载均衡：<br>分配策略：</p>
+<ul>
+<li>轮询（默认）<br>每个请求按时间顺序逐一分配到不同的后端服务器，如果后端服务器down掉，能自动剔除。</li>
+<li>weight<br>指定轮询几率，weight和访问比率成正比，用于后端服务器性能不均的情况。</li>
+<li><p>ip_hash<br>每个请求按访问ip的hash结果分配，这样每个访客固定访问一个后端服务器，可以解决session的问题。  </p>
+</li>
+<li><p>fair<br>按后端服务器的响应时间来分配请求，响应时间短的优先分配。 </p>
+</li>
+<li><p>url_hash<br>按访问url的hash结果来分配请求，使每个url定向到同一个后端服务器，后端服务器为缓存时比较有效。<br>修改配置文件：</p>
+<pre><code>#定义负载均衡设备的 ip及设备状态 
+upstream myServer {   
+ server localhost:8080; 
+ server localhost:8081; 
+ server localhost:8082; 
+ server localhost:8083; 
+ ip_hash;
+}
+
+server {
+ location ~ .*.jsp$ {
+      proxy_pass   http://myServer;
+  }
+}
+</code></pre></li>
+</ul>
+</div><div class="tags"></div><div class="post-nav"><a class="pre" href="/2018/09/26/使用谷歌云服务开启8080等其他的端口/">使用谷歌云服务开启8080等其他的端口</a><a class="next" href="/2018/09/26/mysql中文乱码/">mysql中文乱码</a></div><div id="container"></div><link rel="stylesheet" type="text/css" href="//unpkg.com/gitalk/dist/gitalk.css?v=0.0.0"><script type="text/javascript" src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js?v=0.0.0"></script><script type="text/javascript" src="//unpkg.com/gitalk/dist/gitalk.min.js?v=0.0.0"></script><script>var gitalk = new Gitalk({
+  clientID: '5cd3cb9a9594dbdc1c12',
+  clientSecret: '5180743520e555084ef3ef5e5628240a4093a237',
+  repo: 'zhumeilu.github.io',
+  owner: 'zhumeilu',
+  admin: ['zhumeilu'],
+  id: md5(location.pathname),
+  distractionFreeMode: false
+})
+gitalk.render('container')
+</script></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="search-form"><input id="local-search-input" placeholder="Search" type="text" name="q" results="0"/><div id="local-search-result"></div></div></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Hexo教程/">Hexo教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mongodb/">mongodb</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/hexo/" style="font-size: 15px;">hexo</a> <a href="/tags/Mac/" style="font-size: 15px;">Mac</a> <a href="/tags/nginx/" style="font-size: 15px;">nginx</a> <a href="/tags/mongodb/" style="font-size: 15px;">mongodb</a> <a href="/tags/数据库/" style="font-size: 15px;">数据库</a> <a href="/tags/分表分库/" style="font-size: 15px;">分表分库</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/使用谷歌云服务开启8080等其他的端口/">使用谷歌云服务开启8080等其他的端口</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/nginx配置文件/">nginx配置文件</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/mysql中文乱码/">mysql中文乱码</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/mongodb学习笔记一/">mongodb学习笔记一</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/mac下安装配置nginx/">mac下安装配置nginx</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/shardingjdbc分表分库，主从分离/">shardingjdbc分表分库，主从分离</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/关于数据库水平拆分和垂直拆分/">关于数据库水平拆分和垂直拆分</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/10/hexo集成gitalk的一些问题/">hexo集成gitalk的一些问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/07/hexo-d-无响应-hexo-d-提交git失败/">hexo d 无响应 hexo deploy 提交git失败</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/07/hello-world/">Hello World</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="http://www.bejson.com/" title="www.bejson.com" target="_blank">www.bejson.com</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2018 <a href="/." rel="nofollow">maylor's blogs.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.3.5/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.3.5/jquery.fancybox.min.css"><script type="text/javascript" src="/js/search.js?v=0.0.0"></script><script>var search_path = 'search.xml';
+if (search_path.length == 0) {
+   search_path = 'search.xml';
+}
+var path = '/' + search_path;
+searchFunc(path, 'local-search-input', 'local-search-result');
+</script><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
