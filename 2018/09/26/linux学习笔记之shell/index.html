@@ -1,0 +1,225 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>linux学习笔记之shell | maylor's blogs</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/8.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">linux学习笔记之shell</h1><a id="logo" href="/.">maylor's blogs</a><p class="description"></p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a><a href="/categories/"><i class="fa fa-archive"> 文章分类</i></a><a href="/tags/"><i class="fa fa-archive"> 标签</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">linux学习笔记之shell</h1><div class="post-meta">Sep 26, 2018<span> | </span><span class="category"><a href="/categories/linux/">linux</a></span></div><div class="post-content"><h4 id="环境变量"><a href="#环境变量" class="headerlink" title="环境变量"></a>环境变量</h4><table>
+<thead>
+<tr>
+<th>变量名称</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HOME</td>
+<td>用户的主目录</td>
+</tr>
+<tr>
+<td>SHELL</td>
+<td>用户在使用的Shell解释器名称</td>
+</tr>
+<tr>
+<td>PATH</td>
+<td>定义解释器搜索用户执行命令的路径</td>
+</tr>
+<tr>
+<td>EDITOR</td>
+<td>用户默认的文本编辑器</td>
+</tr>
+<tr>
+<td>RANDOM</td>
+<td>生成一个随机数字</td>
+</tr>
+<tr>
+<td>LANG</td>
+<td>系统语言、语系名称</td>
+</tr>
+</tbody>
+</table>
+<h4 id="执行命令"><a href="#执行命令" class="headerlink" title="执行命令"></a>执行命令</h4><p>绝对路径</p>
+<pre><code>/user/local/example.sh
+</code></pre><p>相对路径</p>
+<pre><code>./example.sh
+</code></pre><p>bash shell脚本</p>
+<pre><code>bash example.sh
+
+使用绝对路径和相对路径之前，该文件必须有可执行的权限    
+</code></pre><h4 id="接收参数"><a href="#接收参数" class="headerlink" title="接收参数"></a>接收参数</h4><pre><code>示例example.sh param1 param2 param3
+
+$1 第一个参数
+$2 第二个参数
+$0 当前脚本名称
+$# 参数个数
+$* 所有参数
+</code></pre><h4 id="判断"><a href="#判断" class="headerlink" title="判断"></a>判断</h4><ul>
+<li>文件测试语句</li>
+<li>逻辑测试语句</li>
+<li>整数值比较语句</li>
+<li>字符串比较语句</li>
+<li></li>
+</ul>
+<h5 id="文件测试"><a href="#文件测试" class="headerlink" title="文件测试"></a>文件测试</h5><p>文件测试即使用指定条件来判断文件是否存在或权限是否满足等情况的运算符</p>
+<table>
+<thead>
+<tr>
+<th>操作符</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-d</td>
+<td>测试文件是否为目录类型</td>
+</tr>
+<tr>
+<td>-e</td>
+<td>测试文件是否存在</td>
+</tr>
+<tr>
+<td>-f</td>
+<td>判断是否为一般文件</td>
+</tr>
+<tr>
+<td>-r</td>
+<td>测试当前用户是否有权限读取</td>
+</tr>
+<tr>
+<td>-w</td>
+<td>测试当前用户是否有权限写入</td>
+</tr>
+<tr>
+<td>-x</td>
+<td>测试当前用户是否有权限执行</td>
+</tr>
+</tbody>
+</table>
+<p>$?变量显示上一条命令执行后的返回值。如果返回值为0，则目录存在；如果返回值为非零的值，则意味着目录不存在</p>
+<pre><code>[ -d /etc/fstab ]
+$?
+</code></pre><h5 id="逻辑测试"><a href="#逻辑测试" class="headerlink" title="逻辑测试"></a>逻辑测试</h5><p>逻辑语句用于对测试结果进行逻辑分析，根据测试结果可实现不同的效果。</p>
+<p>在Shell终端中逻辑“与”的运算符号是&amp;&amp;，它表示当前面的命令执行成功后才会执行它后面的命令，因此可以用来判断/dev/cdrom文件是否存在，若存在则输出Exist字样。</p>
+<pre><code>[ -e /dev/cdrom ] &amp;&amp; echo &quot;Exist&quot;
+Exist
+</code></pre><p>除了逻辑“与”外，还有逻辑“或”，它在Linux系统中的运算符号为||，表示当前面的命令执行失败后才会执行它后面的命令</p>
+<p>第三种逻辑语句是“非”，在Linux系统中的运算符号是一个叹号（！），它表示把条件测试中的判断结果取相反值。也就是说，如果原本测试的结果是正确的，则将其变成错误的；原本测试错误的结果则将其变成正确的。</p>
+<h5 id="整数比较符"><a href="#整数比较符" class="headerlink" title="整数比较符"></a>整数比较符</h5><table>
+<thead>
+<tr>
+<th>操作符</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-eq</td>
+<td>是否等于</td>
+</tr>
+<tr>
+<td>-ne</td>
+<td>是否不等于</td>
+</tr>
+<tr>
+<td>-gt</td>
+<td>是否大于</td>
+</tr>
+<tr>
+<td>-lt</td>
+<td>是否小于</td>
+</tr>
+<tr>
+<td>-le</td>
+<td>是否等于或小于</td>
+</tr>
+<tr>
+<td>-ge</td>
+<td>是否大于或等于</td>
+</tr>
+</tbody>
+</table>
+<pre><code>[ 10 -gt 10 ]
+echo $?
+1
+
+示例2
+使用整数运算符来判断内存可用量的值是否小于1024，若小于则会提示“Insufficient Memory”（内存不足）的字样
+FreeMem=`free -m | grep Mem: | awk &apos;{print $4}&apos;`
+[ $FreeMem -lt 1024 ] &amp;&amp; echo &quot;Insufficient Memory&quot;
+</code></pre><h5 id="字符串比较"><a href="#字符串比较" class="headerlink" title="字符串比较"></a>字符串比较</h5><table>
+<thead>
+<tr>
+<th>操作符</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>=</td>
+<td>比较字符串内容是否相同</td>
+</tr>
+<tr>
+<td>!=</td>
+<td>比较字符串内容是否不同</td>
+</tr>
+<tr>
+<td>-z</td>
+<td>判断字符串内容是否为空</td>
+</tr>
+</tbody>
+</table>
+<pre><code>通过判断String变量是否为空值，进而判断是否定义了这个变量：
+[ -z $String ]
+echo $?
+0
+</code></pre><h4 id="条件语句"><a href="#条件语句" class="headerlink" title="条件语句"></a>条件语句</h4><h5 id="if"><a href="#if" class="headerlink" title="if"></a>if</h5><pre><code>if 条件
+    then 命令
+fi
+
+if 条件
+    then 命令
+else 命令2
+fi
+
+if 条件
+    then 命令
+elif 条件2
+    then 命令2
+else 条件3
+    命令3
+fi
+</code></pre><h5 id="for-in"><a href="#for-in" class="headerlink" title="for in"></a>for in</h5><pre><code>for 变量名 in 列表
+do
+    命令
+done
+</code></pre><h5 id="while"><a href="#while" class="headerlink" title="while"></a>while</h5><pre><code>while 条件
+do
+    命令
+done
+</code></pre><h5 id="case-in"><a href="#case-in" class="headerlink" title="case in"></a>case in</h5><pre><code>case 变量值 in
+值)
+    命令
+    ;;
+*)
+    默认命令
+esac
+</code></pre><h4 id="计划任务"><a href="#计划任务" class="headerlink" title="计划任务"></a>计划任务</h4><p>一次性计划任务</p>
+<pre><code>at 时间         创建计划
+at -l           查看未执行的计划任务
+atrm 任务序号   删除计划任务
+</code></pre><p>长期性计划任务</p>
+<pre><code>在crond服务的计划任务参数中，所有命令一定要用绝对路径的方式来写，如果不知道绝对路径，请用whereis命令进行查询
+crontab -e          创建或者编辑
+crontab -l          查看计划任务
+crontab -r          删除计划任务
+</code></pre></div><div class="tags"></div><div class="post-nav"><a class="pre" href="/2018/09/26/linux学习笔记之用户管理/">linux学习笔记之用户管理</a><a class="next" href="/2018/09/26/linux学习笔记之vim编辑/">linux学习笔记之vim编辑</a></div><div id="container"></div><link rel="stylesheet" type="text/css" href="//unpkg.com/gitalk/dist/gitalk.css?v=0.0.0"><script type="text/javascript" src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js?v=0.0.0"></script><script type="text/javascript" src="//unpkg.com/gitalk/dist/gitalk.min.js?v=0.0.0"></script><script>var gitalk = new Gitalk({
+  clientID: '5cd3cb9a9594dbdc1c12',
+  clientSecret: '5180743520e555084ef3ef5e5628240a4093a237',
+  repo: 'zhumeilu.github.io',
+  owner: 'zhumeilu',
+  admin: ['zhumeilu'],
+  id: md5(location.pathname),
+  distractionFreeMode: false
+})
+gitalk.render('container')
+</script></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="search-form"><input id="local-search-input" placeholder="Search" type="text" name="q" results="0"/><div id="local-search-result"></div></div></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Hexo教程/">Hexo教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/activemq/">activemq</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/effective-java/">effective java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mongodb/">mongodb</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/netty/">netty</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/redis/">redis</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/springcloud/">springcloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tomcat/">tomcat</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/其他/">其他</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/游戏/">游戏</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/爬虫/">爬虫</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/设计模式/">设计模式</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试复习/">面试复习</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/shardingjdbc/" style="font-size: 15px;">shardingjdbc</a> <a href="/tags/activemq/" style="font-size: 15px;">activemq</a> <a href="/tags/spring/" style="font-size: 15px;">spring</a> <a href="/tags/linux/" style="font-size: 15px;">linux</a> <a href="/tags/Mac/" style="font-size: 15px;">Mac</a> <a href="/tags/nginx/" style="font-size: 15px;">nginx</a> <a href="/tags/游戏/" style="font-size: 15px;">游戏</a> <a href="/tags/netty/" style="font-size: 15px;">netty</a> <a href="/tags/mongodb/" style="font-size: 15px;">mongodb</a> <a href="/tags/hexo/" style="font-size: 15px;">hexo</a> <a href="/tags/springboot/" style="font-size: 15px;">springboot</a> <a href="/tags/springcloud/" style="font-size: 15px;">springcloud</a> <a href="/tags/数据库/" style="font-size: 15px;">数据库</a> <a href="/tags/分表分库/" style="font-size: 15px;">分表分库</a> <a href="/tags/protobuf/" style="font-size: 15px;">protobuf</a> <a href="/tags/tomcat/" style="font-size: 15px;">tomcat</a> <a href="/tags/mysql优化/" style="font-size: 15px;">mysql优化</a> <a href="/tags/设计模式/" style="font-size: 15px;">设计模式</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/linux学习笔记之存储结构/">linux学习笔记之存储结构</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/linux学习笔记之用户管理/">linux学习笔记之用户管理</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/linux学习笔记之shell/">linux学习笔记之shell</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/linux学习笔记之vim编辑/">linux学习笔记之vim编辑</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/linux学习笔记之重定向符/">linux学习笔记之重定向符</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/linux学习笔记之查看命令/">linux学习笔记之查看命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/linux学习笔记之进程相关/">linux学习笔记之进程相关</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/springcloud微服务实战-学习笔记六-服务网关/">springcloud微服务实战 学习笔记六 服务网关</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/springcloud微服务实战-学习笔记三-服务消费者/">springcloud微服务实战  学习笔记三 服务消费者</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/冒泡排序java实现/">冒泡排序java实现</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="http://www.bejson.com/" title="www.bejson.com" target="_blank">www.bejson.com</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2018 <a href="/." rel="nofollow">maylor's blogs.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.3.5/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.3.5/jquery.fancybox.min.css"><script type="text/javascript" src="/js/search.js?v=0.0.0"></script><script>var search_path = 'search.xml';
+if (search_path.length == 0) {
+   search_path = 'search.xml';
+}
+var path = '/' + search_path;
+searchFunc(path, 'local-search-input', 'local-search-result');
+</script><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>linux学习笔记之进程相关 | maylor's blogs</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/8.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">linux学习笔记之进程相关</h1><a id="logo" href="/.">maylor's blogs</a><p class="description"></p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a><a href="/categories/"><i class="fa fa-archive"> 文章分类</i></a><a href="/tags/"><i class="fa fa-archive"> 标签</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">linux学习笔记之进程相关</h1><div class="post-meta">Sep 26, 2018<span> | </span><span class="category"><a href="/categories/linux/">linux</a></span></div><div class="post-content"><p>ps命令</p>
+<pre><code>    查看系统进程状态
+    -a  显示所有进程（包括其他用户的进程）
+    -u  用户以及其他详细信息
+    -x  显示没有控制终端的进程
+    一般用法:
+        ps aux
+        ps -ef| grep java
+进程状态
+
+        R（运行）：进程正在运行或在运行队列中等待。
+        S（中断）：进程处于休眠中，当某个条件形成后或者接收到信号时，则脱离该   状态。
+        D（不可中断）：进程不响应系统异步信号，即便用kill命令也不能将其中断。
+        Z（僵死）：进程已经终止，但进程描述符依然存在,直到父进程调用wait4()系统函数后将进程释放。
+        T（停止）：进程收到停止信号后停止运行。
+</code></pre><p>在Linux系统中的命令参数有长短格式之分,长格式(–)短格式(-)，长格式和长格式之间不能合并，长格式和短格式之间也不能合并，但短格式和短格式之间是可以合并的，合并后仅保留一个-（减号）即可。另外ps命令可允许参数不加减号（-），因此可直接写成ps aux的样子。</p>
+<p>top命令</p>
+<pre><code>动态地监视进程活动与系统负载等信息
+</code></pre><p>uname命令</p>
+<pre><code>查看系统内核与系统版本等信息
+-a参数来完整地查看当前系统的内核名称、主机名、内核发行版本、节点名、系统时间、硬件名称、硬件平台、处理器类型以及操作系统名称等信息
+Linux iZ2ze97u5340x51jvn8yx1Z 2.6.32-696.10.1.el6.x86_64 #1 SMP Tue Aug 22 18:51:35 UTC 2017 x86_64 x86_64 x86_64 GNU/Linux
+</code></pre><p>uptime命令</p>
+<pre><code>查看系统当前负载
+18:22:55 up 106 days,  2:30,  3 users,  load average: 0.00, 0.00, 0.00
+当前系统时间、系统已运行时间、启用终端数量以及平均负载值等信息。平均负载值指的是系统在最近1分钟、5分钟、15分钟内的压力情况（下面加粗的信息部分）；负载值越低越好，尽量不要长期超过1，在生产环境中不要超过5
+</code></pre><p>free命令</p>
+<pre><code>显示当前系统中内存的使用量信息
+total 内存总量 used 已用量 free 可用量 shared 进程共享的内存量 buff/cache 磁盘缓存的内存量/缓存的内存量
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">        total        used        free      shared  buff/cache   available</span><br><span class="line">Mem:    8179348     5386912     2115880       84312      676556     2471364</span><br><span class="line">Swap:       0           0           0</span><br></pre></td></tr></table></figure>
+<p>df命令</p>
+<pre><code>显示磁盘分区上的可使用的磁盘空间
+-h 以人类的方式显示（单位为K,M,G等）
+df -h
+</code></pre><p>du命令</p>
+<pre><code>可用于查看目录和文件大小
+-h 以人类的方式显示（单位为K,M,G等）
+-a 打印文件大小，不仅仅是目录大小
+-d n 递归目录深度为n
+du -ah
+</code></pre></div><div class="tags"></div><div class="post-nav"><a class="pre" href="/2018/09/26/linux学习笔记之查看命令/">linux学习笔记之查看命令</a><a class="next" href="/2018/09/26/springcloud微服务实战-学习笔记六-服务网关/">springcloud微服务实战 学习笔记六 服务网关</a></div><div id="container"></div><link rel="stylesheet" type="text/css" href="//unpkg.com/gitalk/dist/gitalk.css?v=0.0.0"><script type="text/javascript" src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js?v=0.0.0"></script><script type="text/javascript" src="//unpkg.com/gitalk/dist/gitalk.min.js?v=0.0.0"></script><script>var gitalk = new Gitalk({
+  clientID: '5cd3cb9a9594dbdc1c12',
+  clientSecret: '5180743520e555084ef3ef5e5628240a4093a237',
+  repo: 'zhumeilu.github.io',
+  owner: 'zhumeilu',
+  admin: ['zhumeilu'],
+  id: md5(location.pathname),
+  distractionFreeMode: false
+})
+gitalk.render('container')
+</script></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="search-form"><input id="local-search-input" placeholder="Search" type="text" name="q" results="0"/><div id="local-search-result"></div></div></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Hexo教程/">Hexo教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/activemq/">activemq</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/effective-java/">effective java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mongodb/">mongodb</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/netty/">netty</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/redis/">redis</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/springcloud/">springcloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tomcat/">tomcat</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/其他/">其他</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/游戏/">游戏</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/爬虫/">爬虫</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/设计模式/">设计模式</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试复习/">面试复习</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/shardingjdbc/" style="font-size: 15px;">shardingjdbc</a> <a href="/tags/activemq/" style="font-size: 15px;">activemq</a> <a href="/tags/spring/" style="font-size: 15px;">spring</a> <a href="/tags/linux/" style="font-size: 15px;">linux</a> <a href="/tags/Mac/" style="font-size: 15px;">Mac</a> <a href="/tags/nginx/" style="font-size: 15px;">nginx</a> <a href="/tags/游戏/" style="font-size: 15px;">游戏</a> <a href="/tags/netty/" style="font-size: 15px;">netty</a> <a href="/tags/mongodb/" style="font-size: 15px;">mongodb</a> <a href="/tags/hexo/" style="font-size: 15px;">hexo</a> <a href="/tags/springboot/" style="font-size: 15px;">springboot</a> <a href="/tags/springcloud/" style="font-size: 15px;">springcloud</a> <a href="/tags/数据库/" style="font-size: 15px;">数据库</a> <a href="/tags/分表分库/" style="font-size: 15px;">分表分库</a> <a href="/tags/protobuf/" style="font-size: 15px;">protobuf</a> <a href="/tags/tomcat/" style="font-size: 15px;">tomcat</a> <a href="/tags/mysql优化/" style="font-size: 15px;">mysql优化</a> <a href="/tags/设计模式/" style="font-size: 15px;">设计模式</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/linux学习笔记之存储结构/">linux学习笔记之存储结构</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/linux学习笔记之用户管理/">linux学习笔记之用户管理</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/linux学习笔记之shell/">linux学习笔记之shell</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/linux学习笔记之vim编辑/">linux学习笔记之vim编辑</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/linux学习笔记之重定向符/">linux学习笔记之重定向符</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/linux学习笔记之查看命令/">linux学习笔记之查看命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/linux学习笔记之进程相关/">linux学习笔记之进程相关</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/springcloud微服务实战-学习笔记六-服务网关/">springcloud微服务实战 学习笔记六 服务网关</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/springcloud微服务实战-学习笔记三-服务消费者/">springcloud微服务实战  学习笔记三 服务消费者</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/冒泡排序java实现/">冒泡排序java实现</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="http://www.bejson.com/" title="www.bejson.com" target="_blank">www.bejson.com</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2018 <a href="/." rel="nofollow">maylor's blogs.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.3.5/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.3.5/jquery.fancybox.min.css"><script type="text/javascript" src="/js/search.js?v=0.0.0"></script><script>var search_path = 'search.xml';
+if (search_path.length == 0) {
+   search_path = 'search.xml';
+}
+var path = '/' + search_path;
+searchFunc(path, 'local-search-input', 'local-search-result');
+</script><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

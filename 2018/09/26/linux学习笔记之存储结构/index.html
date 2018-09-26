@@ -1,0 +1,221 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>linux学习笔记之存储结构 | maylor's blogs</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/8.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">linux学习笔记之存储结构</h1><a id="logo" href="/.">maylor's blogs</a><p class="description"></p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a><a href="/categories/"><i class="fa fa-archive"> 文章分类</i></a><a href="/tags/"><i class="fa fa-archive"> 标签</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">linux学习笔记之存储结构</h1><div class="post-meta">Sep 26, 2018<span> | </span><span class="category"><a href="/categories/linux/">linux</a></span></div><div class="post-content"><h4 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h4><table>
+<thead>
+<tr>
+<th>目录名称</th>
+<th>文件的内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/boot</td>
+<td>开机所需文件—内核、开机菜单以及所需配置文件等</td>
+</tr>
+<tr>
+<td>/dev</td>
+<td>以文件形式存放任何设备与接口</td>
+</tr>
+<tr>
+<td>/etc</td>
+<td>配置文件</td>
+</tr>
+<tr>
+<td>/home</td>
+<td>用户主目录</td>
+</tr>
+<tr>
+<td>/bin</td>
+<td>存放单用户模式下还可以操作的命令</td>
+</tr>
+<tr>
+<td>/lib</td>
+<td>开机时用到的函数库，以及/bin与/sbin下面的命令要调用的函数</td>
+</tr>
+<tr>
+<td>/sbin</td>
+<td>开机过程中需要的命令</td>
+</tr>
+<tr>
+<td>/media</td>
+<td>用于挂载设备文件的目录</td>
+</tr>
+<tr>
+<td>/opt</td>
+<td>放置第三方的软件</td>
+</tr>
+<tr>
+<td>/root</td>
+<td>系统管理员的家目录</td>
+</tr>
+<tr>
+<td>/srv</td>
+<td>一些网络服务的数据文件目录</td>
+</tr>
+<tr>
+<td>/tmp</td>
+<td>任何人均可使用的“共享”临时目录</td>
+</tr>
+<tr>
+<td>/proc</td>
+<td>虚拟文件系统，例如系统内核、进程、外部设备及网络状态等</td>
+</tr>
+<tr>
+<td>/usr/local</td>
+<td>用户自行安装的软件</td>
+</tr>
+<tr>
+<td>/usr/sbin</td>
+<td>Linux系统开机时不会使用到的软件/命令/脚本</td>
+</tr>
+<tr>
+<td>/usr/share</td>
+<td>帮助与说明文件，也可放置共享文件</td>
+</tr>
+<tr>
+<td>/var</td>
+<td>主要存放经常变化的文件，如日志</td>
+</tr>
+<tr>
+<td>/lost+found</td>
+<td>当文件系统发生错误时，将一些丢失的文件片段存放在这里</td>
+</tr>
+</tbody>
+</table>
+<h4 id="物理设备的命名"><a href="#物理设备的命名" class="headerlink" title="物理设备的命名"></a>物理设备的命名</h4><table>
+<thead>
+<tr>
+<th>硬件设备</th>
+<th>文件名称</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IDE设备</td>
+<td>/dev/hd[a-d]</td>
+</tr>
+<tr>
+<td>SCSI/SATA/U盘</td>
+<td>/dev/sd[a-p]</td>
+</tr>
+<tr>
+<td>光驱</td>
+<td>/dev/cdrom</td>
+</tr>
+<tr>
+<td>打印机</td>
+<td>/dev/lp[0-15]</td>
+</tr>
+</tbody>
+</table>
+<pre><code>由于现在的IDE设备已经很少见了，所以一般的硬盘设备都会是以“/dev/sd”开头的。而一台主机上可以有多块硬盘，因此系统采用a～p来代表16块不同的硬盘（默认从a开始分配），而且硬盘的分区编号也很有讲究：
+主分区或扩展分区的编号从1开始，到4结束；
+逻辑分区从编号5开始。
+
+/dev/sda5
+/dev 硬件设备文件所在的目录
+sd 硬盘
+a   硬盘的顺序
+5   第5分区
+</code></pre><h4 id="挂载硬盘"><a href="#挂载硬盘" class="headerlink" title="挂载硬盘"></a>挂载硬盘</h4><p>mount</p>
+<pre><code>mount 文件系统 挂载目录
+mount /dev/sdb2 /newFS
+</code></pre><p>umount </p>
+<pre><code>umount [挂载点/设备文件]
+umount /dev/sb2
+</code></pre><p>这种挂载在每次关机之后就失效了，也就是说每次开机之后就又得重新挂载。要解决这个问题，可以修改/etc/fstab文件。这个文件中包含着挂载所需的诸多信息项目，一旦配置好之后就能一劳永逸了。</p>
+<pre><code>设备文件 挂载目录 格式类型 权限选项 是否备份 是否自检
+
+/dev/sdb2 /newFs ext4 defaults 0 0
+</code></pre><table>
+<thead>
+<tr>
+<th>硬件设备</th>
+<th>文件名称</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>设备文件</td>
+<td>一般为设备的路径+设备名称，也可以写唯一识别码（UUID，Universally Unique Identifier）]</td>
+</tr>
+<tr>
+<td>挂载目录</td>
+<td>指定要挂载到的目录，需在挂载前创建好</td>
+</tr>
+<tr>
+<td>格式类型</td>
+<td>指定文件系统的格式，比如Ext3、Ext4、XFS、SWAP、iso9660（此为光盘设备）等</td>
+</tr>
+<tr>
+<td>权限选项</td>
+<td>若设置为defaults，则默认权限为：rw, suid, dev, exec, auto, nouser, async</td>
+</tr>
+<tr>
+<td>是否备份</td>
+<td>若为1则开机后使用dump进行磁盘备份，为0则不备份</td>
+</tr>
+<tr>
+<td>是否自检</td>
+<td>若为1则开机后自动进行磁盘自检，为0则不自检</td>
+</tr>
+</tbody>
+</table>
+<h4 id="fdisk命令-格式化硬盘"><a href="#fdisk命令-格式化硬盘" class="headerlink" title="fdisk命令 格式化硬盘"></a>fdisk命令 格式化硬盘</h4><pre><code>fdisk是交互式命令
+</code></pre><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>m</td>
+<td>查看全部可用的参数</td>
+</tr>
+<tr>
+<td>n</td>
+<td>添加新的分区</td>
+</tr>
+<tr>
+<td>d</td>
+<td>删除某个分区信息</td>
+</tr>
+<tr>
+<td>l</td>
+<td>列出所有可用的分区类型</td>
+</tr>
+<tr>
+<td>t</td>
+<td>改变某个分区的类型</td>
+</tr>
+<tr>
+<td>p</td>
+<td>查看分区表信息</td>
+</tr>
+<tr>
+<td>w</td>
+<td>保存并退出</td>
+</tr>
+<tr>
+<td>q</td>
+<td>不保存直接退出</td>
+</tr>
+</tbody>
+</table>
+</div><div class="tags"></div><div class="post-nav"><a class="next" href="/2018/09/26/linux学习笔记之用户管理/">linux学习笔记之用户管理</a></div><div id="container"></div><link rel="stylesheet" type="text/css" href="//unpkg.com/gitalk/dist/gitalk.css?v=0.0.0"><script type="text/javascript" src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js?v=0.0.0"></script><script type="text/javascript" src="//unpkg.com/gitalk/dist/gitalk.min.js?v=0.0.0"></script><script>var gitalk = new Gitalk({
+  clientID: '5cd3cb9a9594dbdc1c12',
+  clientSecret: '5180743520e555084ef3ef5e5628240a4093a237',
+  repo: 'zhumeilu.github.io',
+  owner: 'zhumeilu',
+  admin: ['zhumeilu'],
+  id: md5(location.pathname),
+  distractionFreeMode: false
+})
+gitalk.render('container')
+</script></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="search-form"><input id="local-search-input" placeholder="Search" type="text" name="q" results="0"/><div id="local-search-result"></div></div></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Hexo教程/">Hexo教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/activemq/">activemq</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/effective-java/">effective java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mongodb/">mongodb</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/netty/">netty</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/redis/">redis</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/springcloud/">springcloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tomcat/">tomcat</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/其他/">其他</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/游戏/">游戏</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/爬虫/">爬虫</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/设计模式/">设计模式</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试复习/">面试复习</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/shardingjdbc/" style="font-size: 15px;">shardingjdbc</a> <a href="/tags/activemq/" style="font-size: 15px;">activemq</a> <a href="/tags/spring/" style="font-size: 15px;">spring</a> <a href="/tags/linux/" style="font-size: 15px;">linux</a> <a href="/tags/Mac/" style="font-size: 15px;">Mac</a> <a href="/tags/nginx/" style="font-size: 15px;">nginx</a> <a href="/tags/游戏/" style="font-size: 15px;">游戏</a> <a href="/tags/netty/" style="font-size: 15px;">netty</a> <a href="/tags/mongodb/" style="font-size: 15px;">mongodb</a> <a href="/tags/hexo/" style="font-size: 15px;">hexo</a> <a href="/tags/springboot/" style="font-size: 15px;">springboot</a> <a href="/tags/springcloud/" style="font-size: 15px;">springcloud</a> <a href="/tags/数据库/" style="font-size: 15px;">数据库</a> <a href="/tags/分表分库/" style="font-size: 15px;">分表分库</a> <a href="/tags/protobuf/" style="font-size: 15px;">protobuf</a> <a href="/tags/tomcat/" style="font-size: 15px;">tomcat</a> <a href="/tags/mysql优化/" style="font-size: 15px;">mysql优化</a> <a href="/tags/设计模式/" style="font-size: 15px;">设计模式</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/linux学习笔记之存储结构/">linux学习笔记之存储结构</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/linux学习笔记之用户管理/">linux学习笔记之用户管理</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/linux学习笔记之shell/">linux学习笔记之shell</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/linux学习笔记之vim编辑/">linux学习笔记之vim编辑</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/linux学习笔记之重定向符/">linux学习笔记之重定向符</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/linux学习笔记之查看命令/">linux学习笔记之查看命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/linux学习笔记之进程相关/">linux学习笔记之进程相关</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/springcloud微服务实战-学习笔记六-服务网关/">springcloud微服务实战 学习笔记六 服务网关</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/springcloud微服务实战-学习笔记三-服务消费者/">springcloud微服务实战  学习笔记三 服务消费者</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/冒泡排序java实现/">冒泡排序java实现</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="http://www.bejson.com/" title="www.bejson.com" target="_blank">www.bejson.com</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2018 <a href="/." rel="nofollow">maylor's blogs.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.3.5/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.3.5/jquery.fancybox.min.css"><script type="text/javascript" src="/js/search.js?v=0.0.0"></script><script>var search_path = 'search.xml';
+if (search_path.length == 0) {
+   search_path = 'search.xml';
+}
+var path = '/' + search_path;
+searchFunc(path, 'local-search-input', 'local-search-result');
+</script><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
