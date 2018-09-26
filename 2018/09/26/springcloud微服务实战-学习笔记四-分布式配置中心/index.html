@@ -1,0 +1,124 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>springcloud微服务实战 学习笔记四 分布式配置中心 | maylor's blogs</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/8.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">springcloud微服务实战 学习笔记四 分布式配置中心</h1><a id="logo" href="/.">maylor's blogs</a><p class="description"></p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a><a href="/categories/"><i class="fa fa-archive"> 文章分类</i></a><a href="/tags/"><i class="fa fa-archive"> 标签</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">springcloud微服务实战 学习笔记四 分布式配置中心</h1><div class="post-meta">Sep 26, 2018<span> | </span><span class="category"><a href="/categories/springcloud/">springcloud</a></span></div><div class="post-content"><p>####介绍<br>Spring Cloud Config是Spring Cloud团队创建的一个全新项目，用来为分布式系统中的基础设施和微服务应用提供集中化的外部配置支持，它分为服务端与客户端两个部分。其中服务端也称为分布式配置中心，它是一个独立的微服务应用，用来连接配置仓库并为客户端提供获取配置信息、加密/解密信息等访问接口；而客户端则是微服务架构中的各个微服务应用或基础设施，它们通过指定的配置中心来管理应用资源与业务相关的配置内容，并在启动的时候从配置中心获取和加载配置信息。Spring Cloud Config实现了对服务端和客户端中环境变量和属性配置的抽象映射，所以它除了适用于Spring构建的应用程序之外，也可以在任何其他语言运行的应用程序中使用。由于Spring Cloud Config实现的配置中心默认采用Git来存储配置信息，所以使用Spring Cloud Config构建的配置服务器，天然就支持对微服务应用配置信息的版本管理，并且可以通过Git客户端工具来方便的管理和访问配置内容。当然它也提供了对其他存储方式的支持，比如：SVN仓库、本地化文件系统。</p>
+<p>####依赖</p>
+<pre><code>&lt;parent&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+    &lt;version&gt;1.5.4.RELEASE&lt;/version&gt;
+    &lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt;
+&lt;/parent&gt;
+&lt;properties&gt;
+    &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+    &lt;project.reporting.outputEncoding&gt;UTF-8&lt;/project.reporting.outputEncoding&gt;
+    &lt;java.version&gt;1.8&lt;/java.version&gt;
+&lt;/properties&gt;
+
+&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-cloud-config-server&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+
+&lt;/dependencies&gt;
+
+&lt;dependencyManagement&gt;
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-cloud-dependencies&lt;/artifactId&gt;
+            &lt;version&gt;Dalston.SR1&lt;/version&gt;
+            &lt;type&gt;pom&lt;/type&gt;
+            &lt;scope&gt;import&lt;/scope&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+&lt;/dependencyManagement&gt;
+
+&lt;build&gt;
+    &lt;plugins&gt;
+        &lt;plugin&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+        &lt;/plugin&gt;
+    &lt;/plugins&gt;
+&lt;/build&gt;
+</code></pre><p>####配置文件</p>
+<pre><code>spring.application.name=config-server
+server.port=1201
+
+# git仓库配置
+spring.cloud.config.server.git.uri=https://github.com/zhumeilu/springcloud-config-repo-demo/
+#spring.cloud.config.server.git.searchPaths=Chapter1-1-8/config-repo
+spring.cloud.config.server.git.username=
+spring.cloud.config.server.git.password=
+</code></pre><p>####Application.java</p>
+<pre><code>@EnableConfigServer  //开启配置中心服务
+@SpringBootApplication
+public class Application {
+    public static void main(String[] args) {
+        new SpringApplicationBuilder(Application.class).web(true).run(args);
+    }
+
+}
+</code></pre><ul>
+<li>/{application}/{profile}[/{label}]</li>
+<li>/{application}-{profile}.yml</li>
+<li>/{label}/{application}-{profile}.yml</li>
+<li>/{application}-{profile}.properties</li>
+<li>/{label}/{application}-{profile}.properties</li>
+</ul>
+<p>{label}对应Git上不同的分支，默认为master,{application}为配置的文件名称，{profile}为环境<br>访问<a href="http://localhost:1201/config-client/dev/master就可以看到配置文件了" target="_blank" rel="noopener">http://localhost:1201/config-client/dev/master就可以看到配置文件了</a></p>
+<p>###客户端</p>
+<p>构建一个简单的springboot应用<br>配置文件</p>
+<pre><code>spring.application.name=eureka-consumer
+server.port=4444
+eureka.instance.hostname=localhost
+#服务注册中心
+#eureka.client.serviceUrl.defaultZone=http://localhost:1111/eureka/
+spring.cloud.config.profile=dev
+spring.cloud.config.name=config-client
+spring.cloud.config.uri=http://localhost:1201/
+spring.cloud.config.label=master
+</code></pre><p>在controller中添加</p>
+<pre><code>@Value(&quot;${from}&quot;)
+String from;
+@GetMapping(&quot;/getFrom&quot;)
+public String getFrom(){
+    return from;
+}
+</code></pre><p>访问<a href="http://localhost:4444/getForm" target="_blank" rel="noopener">http://localhost:4444/getForm</a><br>得到配置文件中的form的值</p>
+<p>在客户端使用配置中心时，spring.cloud.config.name和spring.application.name都可以确定配置文件名称，最好使用spring.cloud.config.name=config-client来确定配置文件名称，不要使用spring.application.name=config-client来确定。如果都存在的话，默认使用spring.cloud.config.name</p>
+<p>###配置中心集群<br>将多个配置中心注册为服务，使其实现集群和负载均衡</p>
+<p>####服务端</p>
+<p>依赖<br>在之前的基础上添加依赖</p>
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-eureka&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre><p>配置文件<br>在之前的基础上添加注册中心</p>
+<pre><code># 配置服务注册中心
+eureka.client.serviceUrl.defaultZone=http://localhost:1111/eureka/
+</code></pre><p>Application.java</p>
+<p>添加注解<code>@EnableDiscoveryClient  //注解使其成为服务</code></p>
+<p>####客户端</p>
+<p>配置文件<br>在原来的基础是添加</p>
+<pre><code>#开启通过服务来访问Config Server的功能
+spring.cloud.config.discovery.enabled=true
+#指定Config Server注册的服务名
+spring.cloud.config.discovery.serviceId=config-server
+</code></pre><p>当git上的配置文件更新时，可以在项目中添加spring-boot-starter-actuator模块，在需要刷新的controller上添加注解<code>@RefreshScope</code>然后访问/refresh，需要注意的是springboot中默认开启安全策略，无法通过fidder或者postman之类的工具调用/refresh，所以需要设置management.security.enabled= false</p>
+</div><div class="tags"></div><div class="post-nav"><a class="next" href="/2018/09/26/希尔排序java实现/">希尔排序java实现</a></div><div id="container"></div><link rel="stylesheet" type="text/css" href="//unpkg.com/gitalk/dist/gitalk.css?v=0.0.0"><script type="text/javascript" src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js?v=0.0.0"></script><script type="text/javascript" src="//unpkg.com/gitalk/dist/gitalk.min.js?v=0.0.0"></script><script>var gitalk = new Gitalk({
+  clientID: '5cd3cb9a9594dbdc1c12',
+  clientSecret: '5180743520e555084ef3ef5e5628240a4093a237',
+  repo: 'zhumeilu.github.io',
+  owner: 'zhumeilu',
+  admin: ['zhumeilu'],
+  id: md5(location.pathname),
+  distractionFreeMode: false
+})
+gitalk.render('container')
+</script></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="search-form"><input id="local-search-input" placeholder="Search" type="text" name="q" results="0"/><div id="local-search-result"></div></div></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Hexo教程/">Hexo教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/activemq/">activemq</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/effective-java/">effective java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mongodb/">mongodb</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/netty/">netty</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/redis/">redis</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/springcloud/">springcloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tomcat/">tomcat</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/其他/">其他</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/游戏/">游戏</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/爬虫/">爬虫</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/设计模式/">设计模式</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试复习/">面试复习</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/springboot/" style="font-size: 15px;">springboot</a> <a href="/tags/activemq/" style="font-size: 15px;">activemq</a> <a href="/tags/linux/" style="font-size: 15px;">linux</a> <a href="/tags/游戏/" style="font-size: 15px;">游戏</a> <a href="/tags/netty/" style="font-size: 15px;">netty</a> <a href="/tags/Mac/" style="font-size: 15px;">Mac</a> <a href="/tags/nginx/" style="font-size: 15px;">nginx</a> <a href="/tags/mongodb/" style="font-size: 15px;">mongodb</a> <a href="/tags/hexo/" style="font-size: 15px;">hexo</a> <a href="/tags/shardingjdbc/" style="font-size: 15px;">shardingjdbc</a> <a href="/tags/数据库/" style="font-size: 15px;">数据库</a> <a href="/tags/分表分库/" style="font-size: 15px;">分表分库</a> <a href="/tags/springcloud/" style="font-size: 15px;">springcloud</a> <a href="/tags/protobuf/" style="font-size: 15px;">protobuf</a> <a href="/tags/mysql优化/" style="font-size: 15px;">mysql优化</a> <a href="/tags/tomcat/" style="font-size: 15px;">tomcat</a> <a href="/tags/设计模式/" style="font-size: 15px;">设计模式</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/springcloud微服务实战-学习笔记四-分布式配置中心/">springcloud微服务实战 学习笔记四 分布式配置中心</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/希尔排序java实现/">希尔排序java实现</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/java支付宝支付-即时到账/">java支付宝支付(即时到账)</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/从零开始netty学习笔记之BIO/">从零开始netty学习笔记之BIO</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/从零开始netty学习笔记之netty简单demo/">从零开始netty学习笔记之netty简单demo</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/springcloud微服务实战-学习笔记二-服务提供者/">springcloud微服务实战 学习笔记二 服务提供者</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/选择排序java实现/">选择排序java实现</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/第1条：考虑用静态工厂方法代替构造器/">第1条：考虑用静态工厂方法代替构造器</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/从零开始netty学习笔记之TCP粘包和拆包/">从零开始netty学习笔记之TCP粘包和拆包</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/第8条：覆盖equals请遵守通用约定/">第8条：覆盖equals请遵守通用约定</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="http://www.bejson.com/" title="www.bejson.com" target="_blank">www.bejson.com</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2018 <a href="/." rel="nofollow">maylor's blogs.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.3.5/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.3.5/jquery.fancybox.min.css"><script type="text/javascript" src="/js/search.js?v=0.0.0"></script><script>var search_path = 'search.xml';
+if (search_path.length == 0) {
+   search_path = 'search.xml';
+}
+var path = '/' + search_path;
+searchFunc(path, 'local-search-input', 'local-search-result');
+</script><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

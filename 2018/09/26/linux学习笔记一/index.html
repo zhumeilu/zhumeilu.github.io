@@ -1,0 +1,129 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>linux学习笔记一 | maylor's blogs</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/8.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">linux学习笔记一</h1><a id="logo" href="/.">maylor's blogs</a><p class="description"></p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a><a href="/categories/"><i class="fa fa-archive"> 文章分类</i></a><a href="/tags/"><i class="fa fa-archive"> 标签</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">linux学习笔记一</h1><div class="post-meta">Sep 26, 2018<span> | </span><span class="category"><a href="/categories/linux/">linux</a></span></div><div class="post-content"><h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2><h3 id="文件操作命令"><a href="#文件操作命令" class="headerlink" title="文件操作命令"></a>文件操作命令</h3><h4 id="cat命令"><a href="#cat命令" class="headerlink" title="cat命令"></a>cat命令</h4><pre><code>显示文件内容
+</code></pre><ul>
+<li><p>-b 从1开始对所有非空输出行进行编号</p>
+</li>
+<li><p>-n 从1开始对所有输出行进行编号</p>
+</li>
+<li><p>ctrl+s停止滚屏</p>
+</li>
+<li><p>ctrl+q恢复滚屏</p>
+</li>
+<li><p>ctrl+c终止命令的执行</p>
+<pre><code>cat file1 file2
+
+ 同时显示文件file1和file2的内容
+
+ cat file1 file2 &gt; file3
+
+ 将文件file1和file2合并后放入文件file3
+</code></pre><h4 id="tail命令"><a href="#tail命令" class="headerlink" title="tail命令"></a>tail命令</h4><p> 在屏幕上显示指定文件的末尾若干行<br> tail命令在屏幕上显示指定文件的末尾10行.</p>
+<h4 id="touch命令"><a href="#touch命令" class="headerlink" title="touch命令"></a>touch命令</h4><p> 修改指定文件的时间标签,或者创建一个空文件.</p>
+<p> touch命令将会修改指定文件的时间标签,把已存在文件的时间标签更新为系统当前的时间,它们的数据将原封不动的保留下来.如果该文件尚未存在,则创建一个空的新文件.</p>
+<ul>
+<li><p>-m 仅改变指定文件的存取时间</p>
+</li>
+<li><p>-c 不创建任何文件</p>
+</li>
+<li><p>-m 仅改变指定文件的修改时间</p>
+</li>
+</ul>
+<h4 id="grep"><a href="#grep" class="headerlink" title="grep"></a>grep</h4><p> 该命令在文本文件中查找指定模式的词或短语,并在标准输出设备上显示包括给定字符串模式的所有行.</p>
+<p> 该命令组包含三个命令:grep,egrep,fgrep命令.grep命令一次只能搜索一个指定的模式,egrep等同于grep -E,可以使用扩展的字符串模式进行搜索,fgrep命令等同于grep -F,是快速搜索命令,它检索固定字符串,但不识别正则表达式</p>
+<ul>
+<li><p>-c 只显示文件中包含匹配字符串的行的总数</p>
+</li>
+<li><p>-i  不识别大小写</p>
+</li>
+<li><p>-R ,-r 以递归的方式查询目录下的所有子目录中的文件</p>
+</li>
+<li><p>-n 在输出匹配模式的行之前,加上该行的行号(从1开始)</p>
+</li>
+<li><p>-v 只显示不包含匹配字符串的文本行</p>
+</li>
+<li><p>-x 只显示整个行都严格匹配的行</p>
+</li>
+</ul>
+<h4 id="cp"><a href="#cp" class="headerlink" title="cp"></a>cp</h4><p> 将源文件或目录复制到目标文件或目录中</p>
+<p> 如果是复制目录,则需要加 -r参数 递归的将该目录下的所有文件复制到目标目录</p>
+<ul>
+<li><p>-a 该选项通常在复制目录时使用.它递归的将源目录下的所有子目录及其文件都复制到目标目录中,并且保留文件链接和文件属性不变.它等效于-dpR.</p>
+</li>
+<li><p>-d 复制时保留文件链接</p>
+</li>
+<li><p>-f ,–force 如果现存文件不能打开,则删除它并且重试一次.</p>
+</li>
+</ul>
+</li>
+<li><p>-i, –interactive,与-f选项不同,在覆盖目标文件之前先给出提示,要求用户予以确认,交互式复制</p>
+<ul>
+<li>-p 除复制源文件的内容外,还将其修改时间和存取权限也复制到新文件中.</li>
+</ul>
+</li>
+<li><p>-R,-r 递归复制目录,即将源目录下的所有文件及其各级子目录都复制到目标位置</p>
+</li>
+<li><p>-l 不复制,而是创建指向源文件的链接文件,链接文件名由目标文件给出.</p>
+<h4 id="mv"><a href="#mv" class="headerlink" title="mv"></a>mv</h4><p>移动文件或者重命名文件</p>
+<h4 id="rm"><a href="#rm" class="headerlink" title="rm"></a>rm</h4><p>删除文件或目录</p>
+<h4 id="mkdir"><a href="#mkdir" class="headerlink" title="mkdir"></a>mkdir</h4><p>创建目录</p>
+</li>
+<li><p>-m,–mode=MODE 将新建目录的存取权限设置为MODE,存取权限用给定的八进制数字表示</p>
+</li>
+<li><p>-p,-parents 可一次建立多个目录,如果新建目录所指定的路径中有些父目录不存在,则此选项可以自动建立它们.</p>
+</li>
+<li><p>mkdir -p -m 750 test/test2</p>
+<h4 id="rmdir"><a href="#rmdir" class="headerlink" title="rmdir"></a>rmdir</h4><p> 删除空的目录</p>
+<ul>
+<li>-p,–parents 递归删除目录</li>
+</ul>
+<h4 id="pwd"><a href="#pwd" class="headerlink" title="pwd"></a>pwd</h4><p> 显示出当前工作目录的绝对路径</p>
+</li>
+</ul>
+<h4 id="ls命令"><a href="#ls命令" class="headerlink" title="ls命令"></a>ls命令</h4><pre><code>如果给出的参数是目录,该命令将列出其中所有子目录与文件的信息;如果给出的参数是文件,将列出有关该文件属性的一些信息.默认情况下,输出条目按字母顺序排列.如果没有给出参数,将显示当前目录下所有子目录和文件的信息.
+</code></pre><ul>
+<li><p>-l</p>
+<p> 以长格式显示文件的详细信息.输出的信息分成多列,他们依次是:</p>
+<p> 文件类型与权限 链接数 文件主 文件组 文件大小 建立或最近修改的时间 文件名</p>
+<p> -rw-r–r– 1 root root 0 2月 18 20:59 file1</p>
+<p> 其中几个字段的含义说明:</p>
+<ul>
+<li><p>第一个字段中第一个字符表示文件类型,所用字符及其含义是:</p>
+<ul>
+<li>- 普通文件</li>
+<li>d 目录</li>
+<li>b 块设备文件</li>
+<li>c 字符设备文件</li>
+<li>l 符号链接文件</li>
+</ul>
+</li>
+<li><p>随后的9个字符表示文件的存取权限.各权限字符表示如下:</p>
+<ul>
+<li>r 读</li>
+<li>w 写</li>
+<li>x 执行,对于目录,表示可以用访问该目录</li>
+<li>s 当文件被执行时,把该文件的UID或GID赋予执行进程的UID(用户ID)或GID(组ID)</li>
+<li>- 表示没设置权限 </li>
+</ul>
+</li>
+<li><p>对于符号链接文件,在最后”文件名”字段显示的形式是:</p>
+<p>  符号链接文件名-&gt;目标文件的路径名</p>
+</li>
+</ul>
+</li>
+</ul>
+</div><div class="tags"><a href="/tags/linux/">linux</a></div><div class="post-nav"><a class="pre" href="/2018/09/26/netty消息分发思路/">netty消息分发思路</a><a class="next" href="/2018/09/26/linux学习笔记二/">linux学习笔记二</a></div><div id="container"></div><link rel="stylesheet" type="text/css" href="//unpkg.com/gitalk/dist/gitalk.css?v=0.0.0"><script type="text/javascript" src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js?v=0.0.0"></script><script type="text/javascript" src="//unpkg.com/gitalk/dist/gitalk.min.js?v=0.0.0"></script><script>var gitalk = new Gitalk({
+  clientID: '5cd3cb9a9594dbdc1c12',
+  clientSecret: '5180743520e555084ef3ef5e5628240a4093a237',
+  repo: 'zhumeilu.github.io',
+  owner: 'zhumeilu',
+  admin: ['zhumeilu'],
+  id: md5(location.pathname),
+  distractionFreeMode: false
+})
+gitalk.render('container')
+</script></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="search-form"><input id="local-search-input" placeholder="Search" type="text" name="q" results="0"/><div id="local-search-result"></div></div></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Hexo教程/">Hexo教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/activemq/">activemq</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/effective-java/">effective java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mongodb/">mongodb</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/netty/">netty</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/redis/">redis</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/springcloud/">springcloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tomcat/">tomcat</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/其他/">其他</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/游戏/">游戏</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/爬虫/">爬虫</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/设计模式/">设计模式</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试复习/">面试复习</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/springboot/" style="font-size: 15px;">springboot</a> <a href="/tags/activemq/" style="font-size: 15px;">activemq</a> <a href="/tags/linux/" style="font-size: 15px;">linux</a> <a href="/tags/游戏/" style="font-size: 15px;">游戏</a> <a href="/tags/netty/" style="font-size: 15px;">netty</a> <a href="/tags/Mac/" style="font-size: 15px;">Mac</a> <a href="/tags/nginx/" style="font-size: 15px;">nginx</a> <a href="/tags/mongodb/" style="font-size: 15px;">mongodb</a> <a href="/tags/hexo/" style="font-size: 15px;">hexo</a> <a href="/tags/shardingjdbc/" style="font-size: 15px;">shardingjdbc</a> <a href="/tags/数据库/" style="font-size: 15px;">数据库</a> <a href="/tags/分表分库/" style="font-size: 15px;">分表分库</a> <a href="/tags/springcloud/" style="font-size: 15px;">springcloud</a> <a href="/tags/protobuf/" style="font-size: 15px;">protobuf</a> <a href="/tags/mysql优化/" style="font-size: 15px;">mysql优化</a> <a href="/tags/tomcat/" style="font-size: 15px;">tomcat</a> <a href="/tags/设计模式/" style="font-size: 15px;">设计模式</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/springcloud微服务实战-学习笔记四-分布式配置中心/">springcloud微服务实战 学习笔记四 分布式配置中心</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/希尔排序java实现/">希尔排序java实现</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/java支付宝支付-即时到账/">java支付宝支付(即时到账)</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/从零开始netty学习笔记之BIO/">从零开始netty学习笔记之BIO</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/从零开始netty学习笔记之netty简单demo/">从零开始netty学习笔记之netty简单demo</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/springcloud微服务实战-学习笔记二-服务提供者/">springcloud微服务实战 学习笔记二 服务提供者</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/选择排序java实现/">选择排序java实现</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/第1条：考虑用静态工厂方法代替构造器/">第1条：考虑用静态工厂方法代替构造器</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/从零开始netty学习笔记之TCP粘包和拆包/">从零开始netty学习笔记之TCP粘包和拆包</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/第8条：覆盖equals请遵守通用约定/">第8条：覆盖equals请遵守通用约定</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="http://www.bejson.com/" title="www.bejson.com" target="_blank">www.bejson.com</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2018 <a href="/." rel="nofollow">maylor's blogs.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.3.5/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.3.5/jquery.fancybox.min.css"><script type="text/javascript" src="/js/search.js?v=0.0.0"></script><script>var search_path = 'search.xml';
+if (search_path.length == 0) {
+   search_path = 'search.xml';
+}
+var path = '/' + search_path;
+searchFunc(path, 'local-search-input', 'local-search-result');
+</script><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

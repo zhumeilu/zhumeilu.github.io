@@ -1,0 +1,97 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>linux学习笔记二 | maylor's blogs</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/8.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">linux学习笔记二</h1><a id="logo" href="/.">maylor's blogs</a><p class="description"></p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a><a href="/categories/"><i class="fa fa-archive"> 文章分类</i></a><a href="/tags/"><i class="fa fa-archive"> 标签</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">linux学习笔记二</h1><div class="post-meta">Sep 26, 2018<span> | </span><span class="category"><a href="/categories/linux/">linux</a></span></div><div class="post-content"><h3 id="链接文件"><a href="#链接文件" class="headerlink" title="链接文件"></a>链接文件</h3><pre><code>linux具有为一个文件起多个名字的功能,称为链接.
+每个链接可以有不同的权限,不同的命名.
+</code></pre><h4 id="硬链接"><a href="#硬链接" class="headerlink" title="硬链接"></a>硬链接</h4><p>ln默认创建硬链接</p>
+<p>不能对目录文件创建硬链接<br>不能在不同的文件系统中之间做硬链接.就是说,链接文件和被链接文件必须位于同一个文件系统中.</p>
+<h4 id="符号链接"><a href="#符号链接" class="headerlink" title="符号链接"></a>符号链接</h4><p>符号链接也成软链接,是将一个路径名链接到一个文件.这些文件是一种特别类型的文件.事实上,它只是一个文本文件,其中包含它提供链接的另一个文件的路径名.<br>与硬链接不同,符号链接确实是一个新文件,而硬链接并没有建立新文件.<br>符号链接没有硬链接的限制,可以对目录文件创建符号链接,也可以在不同文件系统之间建立符号链接.</p>
+<p>符号链接保持了链接与源文件或目录之间的区别:</p>
+<ul>
+<li>删除源文件或目录,只删除数据,不会删除链接.一旦以同样文件创建源文件,链接将继续指向该文件的新数据.</li>
+<li>在目录长列表中,符号链接以一种特殊的文件类型显示出来,其中第一个字母是l</li>
+<li>符号链接的大小是其链接文件的路径名的字节数</li>
+<li>当用ls -l命令列出文件时,可以看到符号链接名后有一个箭头指向源文件或目录 例:/root/test-&gt;/home/test</li>
+</ul>
+<h4 id="ln命令"><a href="#ln命令" class="headerlink" title="ln命令"></a>ln命令</h4><p>ln命令用来创建链接<br> -s,–symbolic 建立符号链接,而不是硬链接.<br> 符号链接文件不是一个独立的文件,它的许多属性依赖于源文件,所以给符号链接文件设置存取权限是没有意义的.</p>
+<h3 id="关于用户和权限"><a href="#关于用户和权限" class="headerlink" title="关于用户和权限"></a>关于用户和权限</h3><h4 id="文件主"><a href="#文件主" class="headerlink" title="文件主"></a>文件主</h4><p>linux为每个文件都分配了一个文件所有者,即文件主,并赋予文件主唯一的注册名.对文件的控制取决于文件主或超级用户root</p>
+<p>文件或目录的创建者对创建的文件或目录拥有特别的使用权.<br>文件的所有关系是可变的,可以将文件或目录的所有权装让给其他用户,但是只有文件主或root才有权改变文件的所有关系.文件所有权的标志的用户ID(UID)<br>利用chown命令可以修改文件或目录的文件主</p>
+<h4 id="用户组"><a href="#用户组" class="headerlink" title="用户组"></a>用户组</h4><p>当系统管理员为用户建立账号之后，会分配一个组ID和一个特定的用户组名。通常这些组名包含有相同需求的用户。采用组方式也有助于增强系统使用的安全性</p>
+<p>虽然已经分配了一个标记注册组的组ID，但是该组也可以是其他组的成员。如果目前从事的项目涉及多个用户组，那么它可能不止属于属于一个组，从而可以与那些组中的用户共享信息。</p>
+<p>在linux系统中，每个文件隶属于一个用户组。当创建一个文件或目录时，系统会赋予它一个用户组关系，用户组的所有成员都可以使用此文件或目录。<br>文件用户组关系的标志是GID。文件的GID只能由文件主或超级管理员来修改。利用chgrp命令可以改变文件的GID</p>
+<h4 id="存取权限"><a href="#存取权限" class="headerlink" title="存取权限"></a>存取权限</h4><p>linux系统中的每个文件和目录都有存取许可权限。</p>
+<p>linux系统规定了4中不同类型的用户。</p>
+<ul>
+<li>文件主owner</li>
+<li>同组用户group</li>
+<li>可以访问系统的其他用户others</li>
+<li>超级用户root</li>
+</ul>
+<p>存取权限规定了三种访问文件或目录的方式</p>
+<ul>
+<li>读r</li>
+<li>写w</li>
+<li>可执行或可查询x</li>
+</ul>
+<p>使用ls -l 可以显示该文件或目录的权限<br>分别为 文件主权限，组用户权限，其他用户权限</p>
+<h4 id="chmod命令"><a href="#chmod命令" class="headerlink" title="chmod命令"></a>chmod命令</h4><ul>
+<li>以符号模式改变权限</li>
+</ul>
+<p>chmod key 文件名<br>key：[who] [操作符号] [mode]</p>
+<p>who 操作对象可以是下面字母中的任一一个或者它们的组合<br>    u 用户user，即文件或目录的所有者<br>    g 同组group用户，即与文件主由相同组ID的所有用户<br>    o 其他用户others<br>    a 所有用户all，它是系统默认值</p>
+<p>操作符 </p>
+<pre><code>+ 添加某个权限
+- 取消某个权限
+= 富裕给定权限并取消其他所有权限（如果有的话）
+</code></pre><p>mode  所表示的权限可用下面字母的任意组合<br>    r 可读<br>    w 可写<br>    x 可执行<br>    X 只有目标文件对某些用户是可执行的，或该目标文件是目录时，才追加x（可执行）属性<br>    u 与文件主拥有一样的权限<br>    g 与文件主同组的用户拥有一样的权限<br>    o 与其他用户有用一样的权限</p>
+<p>可以有多个key，但必须以逗号分隔开</p>
+<p>chmod u=r，ug=x file</p>
+<ul>
+<li>以绝对方式改变权限 </li>
+</ul>
+<p>chmod mode 文件名</p>
+<p>rwxrwxrwx 如果有权限，则为1没有则为0<br>rwxr-xr-x 111101101表示755 文件主有读写执行权限，组用户和其他用户拥有读，执行权利</p>
+<h4 id="ps命令"><a href="#ps命令" class="headerlink" title="ps命令"></a>ps命令</h4><p>列出每个与当前shell有关的进程的基本信息</p>
+<p>PID TTY TIME CMD</p>
+<pre><code>PID 进程标志号
+TTY 该进程建立时所对应的终端,&quot;?&quot; 表示该经常不占用终端
+TIME 报告进程累计使用的CPU时间.注意,尽管有些命令(如sh)已经运转了很长时间,但是它们真正使用CPU的时间往往很短.所以该字段的值往往是00:00:00
+CMD 执行进程的命令名,是command的缩写
+</code></pre><p>ps -ef </p>
+<pre><code>显示系统中所有进程的全面信息
+</code></pre><p>UID PID PPID C STIME TTY TIME CMD</p>
+<pre><code>UID 进程属主的用户id
+PPID 父进程的ID号
+C 进程最近使用CPU的估算
+STIME 进程开始时间,以&quot;小时:分&quot;的形式给出
+</code></pre><p>ps aux<br>显示所有终端上所有用户的有关进程的所有信息</p>
+<p>USER PID %CPU %MEM VSZ RSS TTY STAT START TIME COMMAND</p>
+<pre><code>USER 启动进程的用户
+%CPU 运行该进程占用CPU的时间与该进程总运行时间的比例
+%MEM 该进程占用内存和总内存的比例
+VSZ 虚拟内存的大小,以KB为单位
+RSS 任务使用的不被交换物理内存的数量,以KB为单位
+STAT 用多个字符表示进程的运行状态,其中包括以下几种代码
+</code></pre><h4 id="kill"><a href="#kill" class="headerlink" title="kill"></a>kill</h4><p>用来终止一个进程的运行</p>
+<ul>
+<li>-s 指定需要发送的信号,该信号既可以是信号名,也可以是对应信号的号码</li>
+<li>-p 指定kill命令只是显示进程的PID 并不是真正发出结束信号</li>
+<li>-l 显示信号名称列表,</li>
+</ul>
+<p>kill命令可以带信号选项,也可以不带.如果没有带信号号码,kill命令就会发出终止信号(TERM),该信号可以被进程捕获,是进程在退出之前清理并释放资源.</p>
+<p>普通用户只能使用不带信号参数的kill命令或至多使用信号9</p>
+<p>只有万不得已时,才用kill信号(9)</p>
+</div><div class="tags"><a href="/tags/linux/">linux</a></div><div class="post-nav"><a class="pre" href="/2018/09/26/linux学习笔记一/">linux学习笔记一</a><a class="next" href="/2018/09/26/activemq的ObjectMessage的安全问题/">activemq的ObjectMessage的安全问题</a></div><div id="container"></div><link rel="stylesheet" type="text/css" href="//unpkg.com/gitalk/dist/gitalk.css?v=0.0.0"><script type="text/javascript" src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js?v=0.0.0"></script><script type="text/javascript" src="//unpkg.com/gitalk/dist/gitalk.min.js?v=0.0.0"></script><script>var gitalk = new Gitalk({
+  clientID: '5cd3cb9a9594dbdc1c12',
+  clientSecret: '5180743520e555084ef3ef5e5628240a4093a237',
+  repo: 'zhumeilu.github.io',
+  owner: 'zhumeilu',
+  admin: ['zhumeilu'],
+  id: md5(location.pathname),
+  distractionFreeMode: false
+})
+gitalk.render('container')
+</script></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="search-form"><input id="local-search-input" placeholder="Search" type="text" name="q" results="0"/><div id="local-search-result"></div></div></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Hexo教程/">Hexo教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/activemq/">activemq</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/effective-java/">effective java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mongodb/">mongodb</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/netty/">netty</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/redis/">redis</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/springcloud/">springcloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tomcat/">tomcat</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/其他/">其他</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/游戏/">游戏</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/爬虫/">爬虫</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/设计模式/">设计模式</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试复习/">面试复习</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/springboot/" style="font-size: 15px;">springboot</a> <a href="/tags/activemq/" style="font-size: 15px;">activemq</a> <a href="/tags/linux/" style="font-size: 15px;">linux</a> <a href="/tags/游戏/" style="font-size: 15px;">游戏</a> <a href="/tags/netty/" style="font-size: 15px;">netty</a> <a href="/tags/Mac/" style="font-size: 15px;">Mac</a> <a href="/tags/nginx/" style="font-size: 15px;">nginx</a> <a href="/tags/mongodb/" style="font-size: 15px;">mongodb</a> <a href="/tags/hexo/" style="font-size: 15px;">hexo</a> <a href="/tags/shardingjdbc/" style="font-size: 15px;">shardingjdbc</a> <a href="/tags/数据库/" style="font-size: 15px;">数据库</a> <a href="/tags/分表分库/" style="font-size: 15px;">分表分库</a> <a href="/tags/springcloud/" style="font-size: 15px;">springcloud</a> <a href="/tags/protobuf/" style="font-size: 15px;">protobuf</a> <a href="/tags/mysql优化/" style="font-size: 15px;">mysql优化</a> <a href="/tags/tomcat/" style="font-size: 15px;">tomcat</a> <a href="/tags/设计模式/" style="font-size: 15px;">设计模式</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/springcloud微服务实战-学习笔记四-分布式配置中心/">springcloud微服务实战 学习笔记四 分布式配置中心</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/希尔排序java实现/">希尔排序java实现</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/java支付宝支付-即时到账/">java支付宝支付(即时到账)</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/从零开始netty学习笔记之BIO/">从零开始netty学习笔记之BIO</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/从零开始netty学习笔记之netty简单demo/">从零开始netty学习笔记之netty简单demo</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/springcloud微服务实战-学习笔记二-服务提供者/">springcloud微服务实战 学习笔记二 服务提供者</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/选择排序java实现/">选择排序java实现</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/第1条：考虑用静态工厂方法代替构造器/">第1条：考虑用静态工厂方法代替构造器</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/从零开始netty学习笔记之TCP粘包和拆包/">从零开始netty学习笔记之TCP粘包和拆包</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/第8条：覆盖equals请遵守通用约定/">第8条：覆盖equals请遵守通用约定</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="http://www.bejson.com/" title="www.bejson.com" target="_blank">www.bejson.com</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2018 <a href="/." rel="nofollow">maylor's blogs.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.3.5/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.3.5/jquery.fancybox.min.css"><script type="text/javascript" src="/js/search.js?v=0.0.0"></script><script>var search_path = 'search.xml';
+if (search_path.length == 0) {
+   search_path = 'search.xml';
+}
+var path = '/' + search_path;
+searchFunc(path, 'local-search-input', 'local-search-result');
+</script><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
