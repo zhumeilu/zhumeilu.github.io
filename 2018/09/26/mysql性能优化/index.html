@@ -1,0 +1,204 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>mysql性能优化 | maylor's blogs</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/8.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">mysql性能优化</h1><a id="logo" href="/.">maylor's blogs</a><p class="description"></p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a><a href="/categories/"><i class="fa fa-archive"> 文章分类</i></a><a href="/tags/"><i class="fa fa-archive"> 标签</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">mysql性能优化</h1><div class="post-meta">Sep 26, 2018<span> | </span><span class="category"><a href="/categories/mysql/">mysql</a></span></div><div class="post-content"><h4 id="MYSQL执行SQL的流程"><a href="#MYSQL执行SQL的流程" class="headerlink" title="MYSQL执行SQL的流程"></a>MYSQL执行SQL的流程</h4><p><img src="https://user-gold-cdn.xitu.io/2018/2/28/161db90b967e9396?w=462&amp;h=364&amp;f=png&amp;s=72990" alt="image.png"></p>
+<p>SQL的执行过程； </p>
+<ol>
+<li>客户端发送一条查询给服务器； </li>
+<li>服务器通过权限检查之后,先会检查查询缓存，如果命中了缓存，则立即返回存储在缓存中的结果。否则进入下一阶段； </li>
+<li>服务器端进行SQL解析、预处理，再由优化器根据该SQL所涉及到的数据表的统计信息进行计算，生成对应的执行计划； </li>
+<li>MySQL根据优化器生成的执行计划，调用存储引擎的API来执行查询； </li>
+<li>将结果返回给客户端。 </li>
+</ol>
+<p>SQL执行的最大瓶颈在于磁盘的IO，即数据的读取；不同SQL的写法，会造成不同的执行计划的执行，而不同的执行计划在IO的上面临完全不一样的数量级，从而造成性能的差距； 所以,我们说,优化SQL,其实就是让查询优化器根据程序猿的计划选择匹配的执行计划,来减少查询中产生的IO;</p>
+<h4 id="schema-表结构-对性能的影响"><a href="#schema-表结构-对性能的影响" class="headerlink" title="schema(表结构)对性能的影响"></a>schema(表结构)对性能的影响</h4><ol>
+<li><p>冗余数据的处理；<br>适当的数据冗余可以提高系统的整体查询性能(在P2P中,在userinfo对象中有realname和idnumber); 关系数据库的三范式: 第一范式（1NF）是对关系模式的基本要求，不满足第一范式（1NF）的数据库就不是关系数据库，是指数据库表的每一列都是不可分割的基本数据项，同一列中不能有多个值； 第二范式（2NF）要求数据库表中的每个实例或行必须可以被惟一地区分。 第三范式（3NF）要求一个数据库表中不包含已在其它表中已包含的非主关键字信息。 (不允许有冗余数据) </p>
+</li>
+<li><p>大表拆小表，有大数据的列单独拆成小表； </p>
+<ol>
+<li>在一个数据库中,一般不会设计属性过多的表; </li>
+<li>在一个数据库中,一般不会有超过500/1000万数据的表(拆表,按照逻辑拆分,按照业务拆分); <ol start="3">
+<li>有大数据的列单独拆成小表(富文本编辑器,CKeditor); </li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>根据需求的展示设置更合理的表结构； </p>
+</li>
+<li><p>把常用属性分离成小表；</p>
+<ol>
+<li>在P2P项目中,我们把logininfo和userinfo和account表拆成了三张表; </li>
+<li>减少查询常用属性需要查询的列; </li>
+<li>便于常用属性的集中缓存;</li>
+</ol>
+</li>
+</ol>
+<p>####索引和索引的优化:<br>1,索引的原理:把无序的数据变成有序的查询;</p>
+<p><img src="https://user-gold-cdn.xitu.io/2018/2/28/161db90b9681b189?w=884&amp;h=456&amp;f=png&amp;s=121073" alt="image.png"></p>
+<h4 id="索引"><a href="#索引" class="headerlink" title="索引:"></a>索引:</h4><ol>
+<li><p>索引的物理结构: </p>
+<ol>
+<li>数据库文件存储的位置:my.ini配置文件中dataDir对应的数据目录中; </li>
+<li>每一个数据库一个文件夹; <ol>
+<li>MYISAM引擎:每一个表(table_name)–&gt;<br>table_name.MYI:存放的是数据表对应的索引信息和索引内容;<br>table_name.FRM:存放的是数据表的结构信息;<br>table_name.MYD:存放的是数据表的内容; </li>
+<li>InnoDB引擎:每一个表(table_name)–&gt;<br>table_name.frm:存放的是数据表的结构信息;<br>数据文件和索引文件都是统一存放在ibdata文件中; </li>
+<li>索引文件都是额外存在的,对索引的查询和维护都是需要消耗IO的; </li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>索引的结构:</p>
+<ol>
+<li>默认情况下,一旦创建了一个表,这个表设置了主键,那么MYSQL会自动的为这个主键创建一个unique的索引;</li>
+<li>索引类型: <ol>
+<li>Normal:普通的索引;允许一个索引值后面关联多个行值; </li>
+<li>UNIQUE:唯一索引;允许一个索引值后面只能有一个行值;之前对列添加唯一约束其实就是为这列添加了一个unique索引;当我们为一个表添加一个主键的时候,其实就是为这个表主键列(设置了非空约束),并为主键列添加了一个唯一索引; </li>
+<li>Fulltext:全文检索,mysql的全文检索只能用myisam引擎,并且性能较低,不建议使用; </li>
+</ol>
+</li>
+<li>索引的方法(规定索引的存储结构): (数据结构,算法基础) <ol>
+<li>b-tree:是一颗树(二叉树,平衡二叉树,平衡树(B-TREE)) 使用平衡树实现索引，是mysql中使用最多的索引类型；在innodb中，存在两种索引类型，第一种是主键索引（primary key），在索引内容中直接保存数据的地址；第二种是其他索引，在索引内容中保存的是指向主键索引的引用；所以在使用innodb的时候，要尽量的使用主键索引，速度非常快； b-tree中保存的数据都是按照一定顺序保存的数据,是可以允许在范围之内进行查询; select * from accountflow where account_id &lt;100;<ol start="2">
+<li>hash:把索引的值做hash运算，并存放到hash表中，使用较少，一般是memory引擎使用；优点:因为使用hash表存储，按照常理，hash的性能比B-TREE效率高很多。<br>hash索引的缺点：<br>1，hash索引只能适用于精确的值比较，=，in，或者&lt;&gt;；无法使用范围查询;<br>2，无法使用索引排序；<br>3，组合hash索引无法使用部分索引；<br>4，如果大量索引hash值相同，性能较低；</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<p><img src="https://user-gold-cdn.xitu.io/2018/2/28/161db90b9690ce7a?w=388&amp;h=294&amp;f=png&amp;s=6473" alt="image.png"></p>
+<p><img src="https://user-gold-cdn.xitu.io/2018/2/28/161db90b96926c32?w=391&amp;h=299&amp;f=png&amp;s=28041" alt="image.png"></p>
+<h4 id="索引的利弊"><a href="#索引的利弊" class="headerlink" title="索引的利弊:"></a>索引的利弊:</h4><ol>
+<li>索引的好处：<br>1，提高表数据的检索效率；<br>2，如果排序的列是索引列(如果查询的列==排序的列[并且在这列上做了索引])，大大降低排序成本；<br>3，在分组操作中如果分组条件是索引列，也会提高效率； </li>
+<li>索引的问题： 索引需要额外的维护成本；因为索引文件是单独存在的文件,对数据的增加,修改,删除,都会产生额外的对索引文件的操作,这些操作需要消耗额外的IO,会降低增/改/删的执行效率; </li>
+<li>怎么创建索引? <ol>
+<li>较频繁的作为查询条件的字段应该创建索引； </li>
+<li>唯一性太差的字段不适合单独创建索引，即使频繁作为查询条件； 作为索引的列,如果不能有效的区分数据,那么这个列就不适合作为索引列;比如(性别,状态不多的状态列)<br>举例:SELECT sum(amount) FROM accountflow WHERE accountType = 0; 假如把accountType作为索引列,因为accountType只有14种,所以,如果根据accountType来创建索引,最多只能按照1/14的比例过滤掉数据;但是,如果可能出现,只按照该条件查询,那我们就要考虑到其他的提升性能的方式了;<br>第一种方案:单独创建一个系统摘要表;在这个里面有一个列叫做系统总充值金额;每次充值成功,增加这个列的值;以后要查询系统总充值金额,只需要从这个系统摘要表中查询;(缺陷:如果充值频率过快,会导致表的锁定问题;)<br>第二种方案:流水一旦发生了,是不会随着时间改变的;针对这种信息,我们就可以使用增量查询(结算+增量查询);<br>1,创建一张日充值表;记录每一天的充值总金额(beginDate,endDate,totalAmount),每天使用定时器对当前的充值记录进行结算;日充值报表里面记录只能记录截止昨天的数据;<br>2,创建一张月充值表;记录每一个月的充值总金额(beginDate,endDate,totalAmount),每月最后一天使用定时器对当月的充值记录进行结算(数据源从日充值报表来);<br>3,要查询系统总充值,从月报表中汇总(当前月之前的总充值金额),再从日充值报表中查询当天之前的日报表数据汇总;再从流水中查询当前截止查询时间的流水;使用另外一张当天流水表记录当天的流水;再把三个数据累加; </li>
+<li>更新非常频繁的字段不适合创建索引；原因,索引有维护成本; </li>
+<li>不会出现在WHERE 子句中的字段不该创建索引； </li>
+<li>索引不是越多越好;(只为必要的列创建索引)<br>1,不管你有多少个索引,一次查询至多采用一个索引;(索引和索引之间是独立的)<br>2,因为索引和索引之间是独立的,所以说每一个索引都应该是单独维护的;数据的增/改/删,会导致所有的索引都要单独维护; <h4 id="索引的使用限制"><a href="#索引的使用限制" class="headerlink" title="索引的使用限制:"></a>索引的使用限制:</h4></li>
+</ol>
+</li>
+<li>BLOB 和TEXT 类型的列只能创建前缀索引 </li>
+<li>MySQL 目前不支持函数索引(在MYSQL中,索引只能是一个列的原始值,不能把列通过计算的值作为索引); 实例:请查询1981年入职的员工: SELECT <em> FROM emp WHERE year(hire_date)=’1981’; 问题:查询的列是在过滤之前经过了函数运算;所以,就算hire_date作为索引,year(hire_date)也不会使用索引; 解决方案: 1,SELECT </em> FROM emp WHERE hire_date BETWEEN ‘1981-01-01’ AND ‘1981-12-31’; 2,在创建一列,这列的值是year(hire_date),然后把这列的值作为索引; 3. 使用不等于（!= 或者&lt;&gt;）的时候MySQL 无法使用索引 </li>
+<li>过滤字段使用了函数运算后（如abs(column)），MySQL 无法使用索引]</li>
+<li>Join 语句中Join 条件字段类型不一致的时候MySQL 无法使用索引 </li>
+<li>使用LIKE 操作的时候如果条件以通配符开始（ ‘%abc…’）MySQL 无法使用索引 1,字符串是可以用来作为索引的; 2,字符串创建的索引按照字母顺序排序; 3,如果使用LIKE,实例:SELECT * FROM userinfo WHERE realName LIKE ‘吴%’;这种情况是可以使用索引的; 但是LIKE ‘_嘉’ 或者LIKE ‘%嘉’都是不能使用索引的; </li>
+<li>使用非等值查询的时候MySQL 无法使用Hash 索引 </li>
+</ol>
+<h4 id="单列索引和复合索引"><a href="#单列索引和复合索引" class="headerlink" title="单列索引和复合索引:"></a>单列索引和复合索引:</h4><ol>
+<li>因为一个查询一次至多只能使用一个索引,所以,如果都使用单值索引(一个列一个索引),在数据量较大的情况下,不能很好的区分数据; </li>
+<li>所以,MYSQL引入了多值索引(复合索引); 复合索引就是由多列的值组成的索引;并且(注意),多列的索引是有顺序的!!!! </li>
+<li>复合索引的原理:就是类似orderby(orderby后面可以跟多个排序条件order by hire_date,username desc); 就是在排序和分组(创建倒排表的时候),按照多个列进行排序和合并;<br>SELECT <em> FROM accountflow WHERE actionTime &lt; ‘xxxxx’ AND account_id = 5 可以使用actionTime+account_id的复合索引;<br>SELECT </em> FROM accountflow WHERE actionTime &lt; ‘xxxxx’ 可以使用actionTime+account_id的复合索引; SELECT <em> FROM accountflow WHERE account_id = 5 不可以使用actionTime+account_id的复合索引; SELECT </em> FROM accountflow WHERE account_id = 5 AND actionTime &lt; ‘xxxxx’ 不可以使用actionTime+account_id的复合索引; </li>
+<li>复合索引,在查询的时候,遵守向左原则;只要在查询的时候,是按照复合索引从左到右的顺序依次查询,不管查询条件是否完全满足所有的符合索引的列,都可以使用部分的符合索引; </li>
+<li>在实际应用中,基本上都使用复合索引; </li>
+</ol>
+<h4 id="查看MYSQL的执行计划和执行明细状态-explain-profiling"><a href="#查看MYSQL的执行计划和执行明细状态-explain-profiling" class="headerlink" title="查看MYSQL的执行计划和执行明细状态(explain+profiling)"></a>查看MYSQL的执行计划和执行明细状态(explain+profiling)</h4><ol>
+<li>Explain:可以让我们查看MYSQL执行一条SQL所选择的执行计划； </li>
+<li>Profiling:可以用来准确定位一条SQL的性能瓶颈； </li>
+</ol>
+<h4 id="EXPLAIN"><a href="#EXPLAIN" class="headerlink" title="EXPLAIN:"></a>EXPLAIN:</h4><ol>
+<li>使用方式： explain SQL;</li>
+<li>返回结果： <ol>
+<li>ID：执行查询的序列号； </li>
+<li>select_type：使用的查询类型 <ol>
+<li>DEPENDENT SUBQUERY：子查询中内层的第一个SELECT，依赖于外部查询的结果集；</li>
+<li>DEPENDENT UNION：子查询中的UNION，且为UNION 中从第二个SELECT 开始的后面所有SELECT，同样依赖于外部查询的结果集；</li>
+<li>PRIMARY：子查询中的最外层查询，注意并不是主键查询； </li>
+<li>SIMPLE：除子查询或者UNION 之外的其他查询； </li>
+<li>SUBQUERY：子查询内层查询的第一个SELECT，结果不依赖于外部查询结果集； </li>
+<li>UNCACHEABLE SUBQUERY：结果集无法缓存的子查询； </li>
+<li>UNION：UNION 语句中第二个SELECT 开始的后面所有SELECT，第一个SELECT 为PRIMARY 8，UNION RESULT：UNION 中的合并结果； </li>
+</ol>
+</li>
+<li>table：这次查询访问的数据表； </li>
+<li>type：对表所使用的访问方式： <ol>
+<li>all：全表扫描</li>
+<li>const：读常量，且最多只会有一条记录匹配，由于是常量，所以实际上只需要读一次； </li>
+<li>eq_ref：最多只会有一条匹配结果，一般是通过主键或者唯一键索引来访问； </li>
+<li>fulltext：全文检索，针对full text索引列； </li>
+<li>index：全索引扫描； </li>
+<li>index_merge：查询中同时使用两个（或更多）索引，然后对索引结果进行merge 之后再读取表数据； </li>
+<li>index_subquery：子查询中的返回结果字段组合是一个索引（或索引组合），但不是一个主键或者唯一索引； </li>
+<li>rang：索引范围扫描； </li>
+<li>ref：Join 语句中被驱动表索引引用查询； </li>
+<li>ref_or_null：与ref 的唯一区别就是在使用索引引用查询之外再增加一个空值的查询； </li>
+<li>system：系统表，表中只有一行数据； </li>
+<li>unique_subquery：子查询中的返回结果字段组合是主键或者唯一约束； </li>
+</ol>
+</li>
+<li>possible_keys：可选的索引；如果没有使用索引，为null； </li>
+<li>key：最终选择的索引； </li>
+<li>key_len：被选择的索引长度； </li>
+<li>ref：过滤的方式，比如const（常量），column（join），func（某个函数）； </li>
+<li>rows：查询优化器通过收集到的统计信息估算出的查询条数； </li>
+<li>Extra：查询中每一步实现的额外细节信息 <ol>
+<li>Distinct：查找distinct 值，所以当mysql 找到了第一条匹配的结果后，将停止该值的查询而转为后面其他值的查询； </li>
+<li>Full scan on NULL key：子查询中的一种优化方式，主要在遇到无法通过索引访问null值的使用使用； </li>
+<li>Impossible WHERE noticed after reading const tables：MySQL Query Optimizer 通过收集到的统计信息判断出不可能存在结果； </li>
+<li>No tables：Query 语句中使用FROM DUAL 或者不包含任何FROM 子句； <ol start="5">
+<li>Not exists：在某些左连接中MySQL Query Optimizer 所通过改变原有Query 的组成而使用的优化方法，可以部分减少数据访问次数； </li>
+<li>Select tables optimized away：当我们使用某些聚合函数来访问存在索引的某个字段的时候，MySQL Query Optimizer 会通过索引而直接一次定位到所需的数据行完成整个查询。当然，前提是在Query 中不能有GROUP BY 操作。如使用MIN()或者MAX（）的时候；</li>
+<li>Using filesort：当我们的Query 中包含ORDER BY 操作，而且无法利用索引完成排序操作的时候，MySQL Query Optimizer 不得不选择相应的排序算法来实现。 </li>
+<li>Using index：所需要的数据只需要在Index 即可全部获得而不需要再到表中取数据； </li>
+<li>Using index for group-by：数据访问和Using index 一样，所需数据只需要读取索引即可，而当Query 中使用了GROUP BY 或者DISTINCT 子句的时候，如果分组字段也在索引中，Extra 中的信息就会是Using index for group-by；               </li>
+<li>Using temporary：当MySQL 在某些操作中必须使用临时表的时候，在Extra 信息中就会出现Using temporary 。主要常见于GROUP BY 和ORDER BY 等操作中。 </li>
+<li>Using where：如果我们不是读取表的所有数据，或者不是仅仅通过索引就可以获取所有需要的数据，则会出现Using where 信息； </li>
+<li>Using where with pushed condition：这是一个仅仅在NDBCluster 存储引擎中才会出现的信息，而且还需要通过打开Condition Pushdown 优化功能才可能会被使用。控制参数为engine_condition_pushdown 。 </li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<h4 id="profiling"><a href="#profiling" class="headerlink" title="profiling:"></a>profiling:</h4><p> Query Profiler是MYSQL5.1之后提供的一个很方便的用于诊断Query执行的工具，能够准确的获取一条查询执行过程中的CPU，IO等情况；</p>
+<pre><code>1. 开启profiling：set profiling=1; 
+2. 执行QUERY，在profiling过程中所有的query都可以记录下来； 
+3. 查看记录的query：show profiles； 
+4. 选择要查看的profile：show profile cpu, block io for query 6
+</code></pre><p> status是执行SQL的详细过程；<br>Duration：执行的具体时间；<br>CPU_user：用户CPU时间；<br>CPU_system：系统CPU时间；<br>Block_ops_in：IO输入次数；<br>Block_ops_out：IO输出次数；<br>profiling只对本次会话有效；</p>
+<h4 id="JOIN"><a href="#JOIN" class="headerlink" title="JOIN:"></a>JOIN:</h4><p>1,JOIN的原理: 在mysql中使用Nested Loop Join来实现join； A JOIN B：通过A表的结果集作为循环基础，一条一条的通过结果集中的数据作为过滤条件到下一个表中查询数据，然后合并结果； 2,JOIN的优化原则: 1，尽可能减少Join 语句中的Nested Loop 的循环总次数，用小结果集驱动大结果集； 2，优先优化Nested Loop 的内层循环； 3，保证Join 语句中被驱动表上Join 条件字段已经被索引； 4，扩大join buffer的大小；</p>
+<p><img src="https://user-gold-cdn.xitu.io/2018/2/28/161db90b96d20dec?w=902&amp;h=416&amp;f=png&amp;s=266075" alt="image.png"></p>
+<h3 id="SQL优化原则"><a href="#SQL优化原则" class="headerlink" title="SQL优化原则:"></a>SQL优化原则:</h3><h4 id="原则一-选择需要优化的SQL"><a href="#原则一-选择需要优化的SQL" class="headerlink" title="[原则一:选择需要优化的SQL]"></a>[原则一:选择需要优化的SQL]</h4><ol>
+<li>选择需要优化的SQL:不是所有的SQL都需要优化,在优化的过程中,首选更需要优化的SQL; 怎么选择?<br>优先选择优化高并发低消耗的SQL； <ol>
+<li>1小时请求1W次，1次10个IO； </li>
+<li>1小时请求10次，1次1W个IO；<br>考虑: </li>
+</ol>
+<ul>
+<li>从单位时间产生的IO总数来说,相同的; </li>
+<li>针对一个SQL,如果我能把10个IO变成7个IO,一小时减少3W个IO; 针对第二个SQL,如果能把1W个IO变成7K个IO,一小时减少3W个IO; </li>
+<li>从优化难度上讲,1W-&gt;7K难的多; </li>
+<li>从整体性能上来说,第一个SQL的优化能够极大的提升系统整体的性能;第二个SQL慢一点,无非也就是10个连接查询慢一点; </li>
+</ul>
+</li>
+<li>定位性能瓶颈； <ol>
+<li>SQL运行较慢有两个影响原因，IO和CPU，明确性能瓶颈所在； </li>
+<li>明确优化目标；<h4 id="原则二-从Explain和Profile入手"><a href="#原则二-从Explain和Profile入手" class="headerlink" title="[原则二:从Explain和Profile入手]"></a>[原则二:从Explain和Profile入手]</h4></li>
+</ol>
+</li>
+<li>任何SQL的优化，都从Explain语句开始；Explain语句能够得到数据库执行该SQL选择的执行计划； </li>
+<li>首先明确需要的执行计划，再使用Explain检查； </li>
+<li>使用profile明确SQL的问题和优化的结果； <h4 id="原则三-永远用小结果集驱动大的结果集"><a href="#原则三-永远用小结果集驱动大的结果集" class="headerlink" title="[原则三:永远用小结果集驱动大的结果集]"></a>[原则三:永远用小结果集驱动大的结果集]</h4><h4 id="原则四-在索引中完成排序"><a href="#原则四-在索引中完成排序" class="headerlink" title="[原则四:在索引中完成排序]"></a>[原则四:在索引中完成排序]</h4><h4 id="原则五-使用最小Columns"><a href="#原则五-使用最小Columns" class="headerlink" title="[原则五:使用最小Columns]"></a>[原则五:使用最小Columns]</h4></li>
+<li>减少网络传输数据量； </li>
+<li>特别是需要使用column排序的时候.为什么?MYSQL排序原理，是把所有的column数据全部取出，在排序缓存区排序，再返回结果；如果column数据量大，排序区容量不够的时候，就会使用先column排序，再取数据，再返回的多次请求方式； <h4 id="原则六-使用最有效的过滤条件"><a href="#原则六-使用最有效的过滤条件" class="headerlink" title="[原则六:使用最有效的过滤条件]"></a>[原则六:使用最有效的过滤条件]</h4></li>
+<li>过多的WHERE条件不一定能够提高访问性能； </li>
+<li>一定要让where条件使用自己预期的执行计划； <h4 id="原则七-避免复杂的JOIN和子查询"><a href="#原则七-避免复杂的JOIN和子查询" class="headerlink" title="[原则七:避免复杂的JOIN和子查询]"></a>[原则七:避免复杂的JOIN和子查询]</h4></li>
+<li>复杂的JOIN和子查询，需要锁定过多的资源，MYSQL在大量并发情况下处理锁定性能下降较快； </li>
+<li>不要过多依赖SQL的功能，把复杂的SQL拆分为简单的SQL； </li>
+<li>MySQL子查询性能较低，应尽量避免使用；</li>
+</ol>
+</div><div class="tags"></div><div class="post-nav"><a class="pre" href="/2018/09/26/mysql中文乱码/">mysql中文乱码</a><a class="next" href="/2018/09/26/mongodb学习笔记一/">mongodb学习笔记一</a></div><div id="container"></div><link rel="stylesheet" type="text/css" href="//unpkg.com/gitalk/dist/gitalk.css?v=0.0.0"><script type="text/javascript" src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js?v=0.0.0"></script><script type="text/javascript" src="//unpkg.com/gitalk/dist/gitalk.min.js?v=0.0.0"></script><script>var gitalk = new Gitalk({
+  clientID: '5cd3cb9a9594dbdc1c12',
+  clientSecret: '5180743520e555084ef3ef5e5628240a4093a237',
+  repo: 'zhumeilu.github.io',
+  owner: 'zhumeilu',
+  admin: ['zhumeilu'],
+  id: md5(location.pathname),
+  distractionFreeMode: false
+})
+gitalk.render('container')
+</script></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="search-form"><input id="local-search-input" placeholder="Search" type="text" name="q" results="0"/><div id="local-search-result"></div></div></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Hexo教程/">Hexo教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/activemq/">activemq</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/effective-java/">effective java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mongodb/">mongodb</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/netty/">netty</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/redis/">redis</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/springcloud/">springcloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tomcat/">tomcat</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/其他/">其他</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/游戏/">游戏</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/爬虫/">爬虫</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/设计模式/">设计模式</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试复习/">面试复习</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/shardingjdbc/" style="font-size: 15px;">shardingjdbc</a> <a href="/tags/activemq/" style="font-size: 15px;">activemq</a> <a href="/tags/spring/" style="font-size: 15px;">spring</a> <a href="/tags/linux/" style="font-size: 15px;">linux</a> <a href="/tags/Mac/" style="font-size: 15px;">Mac</a> <a href="/tags/nginx/" style="font-size: 15px;">nginx</a> <a href="/tags/mongodb/" style="font-size: 15px;">mongodb</a> <a href="/tags/游戏/" style="font-size: 15px;">游戏</a> <a href="/tags/netty/" style="font-size: 15px;">netty</a> <a href="/tags/hexo/" style="font-size: 15px;">hexo</a> <a href="/tags/数据库/" style="font-size: 15px;">数据库</a> <a href="/tags/分表分库/" style="font-size: 15px;">分表分库</a> <a href="/tags/springboot/" style="font-size: 15px;">springboot</a> <a href="/tags/springcloud/" style="font-size: 15px;">springcloud</a> <a href="/tags/protobuf/" style="font-size: 15px;">protobuf</a> <a href="/tags/tomcat/" style="font-size: 15px;">tomcat</a> <a href="/tags/mysql优化/" style="font-size: 15px;">mysql优化</a> <a href="/tags/设计模式/" style="font-size: 15px;">设计模式</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/springcloud微服务实战-学习笔记六-服务网关/">springcloud微服务实战 学习笔记六 服务网关</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/springcloud微服务实战-学习笔记三-服务消费者/">springcloud微服务实战  学习笔记三 服务消费者</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/冒泡排序java实现/">冒泡排序java实现</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/面试复习笔记三(sql)/">面试复习笔记三(sql)</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/springcloud微服务实战-学习笔记四-分布式配置中心/">springcloud微服务实战 学习笔记四 分布式配置中心</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/希尔排序java实现/">希尔排序java实现</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/java支付宝支付-即时到账/">java支付宝支付(即时到账)</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/从零开始netty学习笔记之BIO/">从零开始netty学习笔记之BIO</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/从零开始netty学习笔记之netty简单demo/">从零开始netty学习笔记之netty简单demo</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/springcloud微服务实战-学习笔记二-服务提供者/">springcloud微服务实战 学习笔记二 服务提供者</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="http://www.bejson.com/" title="www.bejson.com" target="_blank">www.bejson.com</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2018 <a href="/." rel="nofollow">maylor's blogs.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.3.5/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.3.5/jquery.fancybox.min.css"><script type="text/javascript" src="/js/search.js?v=0.0.0"></script><script>var search_path = 'search.xml';
+if (search_path.length == 0) {
+   search_path = 'search.xml';
+}
+var path = '/' + search_path;
+searchFunc(path, 'local-search-input', 'local-search-result');
+</script><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

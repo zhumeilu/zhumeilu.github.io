@@ -1,0 +1,107 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>springcloud微服务实战 学习笔记六 服务网关 | maylor's blogs</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/8.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">springcloud微服务实战 学习笔记六 服务网关</h1><a id="logo" href="/.">maylor's blogs</a><p class="description"></p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a><a href="/categories/"><i class="fa fa-archive"> 文章分类</i></a><a href="/tags/"><i class="fa fa-archive"> 标签</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">springcloud微服务实战 学习笔记六 服务网关</h1><div class="post-meta">Sep 26, 2018<span> | </span><span class="category"><a href="/categories/springcloud/">springcloud</a></span></div><div class="post-content"><p>####服务网关简介<br>服务网关是微服务架构中一个不可或缺的部分。通过服务网关统一向外系统提供REST API的过程中，除了具备服务路由、均衡负载功能之外，它还具备了权限控制等功能。Spring Cloud Netflix中的Zuul就担任了这样的一个角色，为微服务架构提供了前门保护的作用，同时将权限控制这些较重的非业务逻辑内容迁移到服务路由层面，使得服务集群主体能够具备更高的可复用性和可测试性。</p>
+<p>###依赖</p>
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-zuul&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-eureka&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre><p>配置</p>
+<pre><code>spring.application.name=api-gateway
+server.port=5555
+#通过url的方式做服务转发（不推荐）
+#zuul.routes.api-a-url.path=/api-a-url/**
+#zuul.routes.api-a-url.url=http://localhost:2222/
+#通过serviceId的方式
+#api-a api-b只是自定义的名称
+zuul.routes.api-a.path=/api-a/**
+zuul.routes.api-a.serviceId=compute-service-a
+zuul.routes.api-b.path=/api-b/**
+zuul.routes.api-b.serviceId=compute-service-b
+#注册为服务
+eureka.client.serviceUrl.defaultZone=http://localhost:1111/eureka/
+</code></pre><p>所有的<code>/api-a/**</code>路径的访问转发到compute-service-a服务<br>所有的<code>/api-b/**</code>路径的访问转发到compute-service-b服务<br>服务网关实现转发有两种方式，一种是通过url的方式转发，另一种是通过serviceId的方式转发。通过url转发的方式，则不需要eureka依赖。<br>推荐使用serviceId的映射方式，除了对Zuul维护上更加友好之外，serviceId映射方式还支持了断路器，对于服务故障的情况下，可以有效的防止故障蔓延到服务网关上而影响整个系统的对外服务</p>
+<p>Application.java</p>
+<pre><code>@EnableZuulProxy
+@SpringCloudApplication
+public class Application {
+    public static void main(String[] args) {
+        new SpringApplicationBuilder(Application.class).web(true).run(args);
+    }
+
+    @Bean
+    public AccessFilter accessFilter(){
+        return new AccessFilter();
+    }
+}
+</code></pre><p>自定义过滤器AccessFilter.java</p>
+<pre><code>public class AccessFilter extends ZuulFilter{
+
+    private static Logger log = LoggerFactory.getLogger(AccessFilter.class);
+
+    @Override
+    public String filterType() {
+        return &quot;pre&quot;;
+    }
+
+    @Override
+    public int filterOrder() {
+        return 0;
+    }
+
+    @Override
+    public boolean shouldFilter() {
+        return true;
+    }
+
+    @Override
+    public Object run() {
+        RequestContext currentContext = RequestContext.getCurrentContext();
+        HttpServletRequest request = currentContext.getRequest();
+        log.info(String.format(&quot;%s request to %s&quot;, request.getMethod(), request.getRequestURL().toString()));
+        String accessToken = request.getParameter(&quot;accessToken&quot;);
+        if(accessToken==null){
+            log.warn(&quot;access token is empty&quot;);
+            currentContext.setSendZuulResponse(false);
+            currentContext.setResponseStatusCode(401);
+            currentContext.setResponseBody(&quot;accessToken is null&quot;);
+            return null;
+        }
+        log.info(&quot;access token ok&quot;);
+        return null;
+    }
+}
+</code></pre><p>自定义过滤器的实现，需要继承ZuulFilter，需要重写实现下面四个方法：</p>
+<ul>
+<li><p>filterType：返回一个字符串代表过滤器的类型，在zuul中定义了四种不同生命周期的过滤器类型，具体如下：</p>
+<ul>
+<li>pre：可以在请求被路由之前调用</li>
+<li>routing：在路由请求时候被调用</li>
+<li>post：在routing和error过滤器之后被调用</li>
+<li>error：处理请求时发生错误时被调用</li>
+</ul>
+</li>
+<li>filterOrder：通过int值来定义过滤器的执行顺序</li>
+<li>shouldFilter：返回一个boolean类型来判断该过滤器是否要执行，所以通过此函数可实现过滤器的开关。在上例中，我们直接返回true，所以该过滤器总是生效。</li>
+<li>run：过滤器的具体逻辑。需要注意，这里我们通过ctx.setSendZuulResponse(false)令zuul过滤该请求，不对其进行路由，然后通过ctx.setResponseStatusCode(401)设置了其返回的错误码，当然我们也可以进一步优化我们的返回，比如，通过ctx.setResponseBody(body)对返回body内容进行编辑等。</li>
+</ul>
+<p>将服务网关注册为服务，将权限系统做成另外一个服务，在网关里面调用这个服务，来实现权限控制。</p>
+</div><div class="tags"></div><div class="post-nav"><a class="next" href="/2018/09/26/springcloud微服务实战-学习笔记三-服务消费者/">springcloud微服务实战  学习笔记三 服务消费者</a></div><div id="container"></div><link rel="stylesheet" type="text/css" href="//unpkg.com/gitalk/dist/gitalk.css?v=0.0.0"><script type="text/javascript" src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js?v=0.0.0"></script><script type="text/javascript" src="//unpkg.com/gitalk/dist/gitalk.min.js?v=0.0.0"></script><script>var gitalk = new Gitalk({
+  clientID: '5cd3cb9a9594dbdc1c12',
+  clientSecret: '5180743520e555084ef3ef5e5628240a4093a237',
+  repo: 'zhumeilu.github.io',
+  owner: 'zhumeilu',
+  admin: ['zhumeilu'],
+  id: md5(location.pathname),
+  distractionFreeMode: false
+})
+gitalk.render('container')
+</script></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="search-form"><input id="local-search-input" placeholder="Search" type="text" name="q" results="0"/><div id="local-search-result"></div></div></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Hexo教程/">Hexo教程</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/activemq/">activemq</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/effective-java/">effective java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mongodb/">mongodb</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/netty/">netty</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/redis/">redis</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/springcloud/">springcloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tomcat/">tomcat</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/其他/">其他</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/游戏/">游戏</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/爬虫/">爬虫</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/设计模式/">设计模式</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试复习/">面试复习</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/shardingjdbc/" style="font-size: 15px;">shardingjdbc</a> <a href="/tags/activemq/" style="font-size: 15px;">activemq</a> <a href="/tags/spring/" style="font-size: 15px;">spring</a> <a href="/tags/linux/" style="font-size: 15px;">linux</a> <a href="/tags/Mac/" style="font-size: 15px;">Mac</a> <a href="/tags/nginx/" style="font-size: 15px;">nginx</a> <a href="/tags/mongodb/" style="font-size: 15px;">mongodb</a> <a href="/tags/游戏/" style="font-size: 15px;">游戏</a> <a href="/tags/netty/" style="font-size: 15px;">netty</a> <a href="/tags/hexo/" style="font-size: 15px;">hexo</a> <a href="/tags/数据库/" style="font-size: 15px;">数据库</a> <a href="/tags/分表分库/" style="font-size: 15px;">分表分库</a> <a href="/tags/springboot/" style="font-size: 15px;">springboot</a> <a href="/tags/springcloud/" style="font-size: 15px;">springcloud</a> <a href="/tags/protobuf/" style="font-size: 15px;">protobuf</a> <a href="/tags/tomcat/" style="font-size: 15px;">tomcat</a> <a href="/tags/mysql优化/" style="font-size: 15px;">mysql优化</a> <a href="/tags/设计模式/" style="font-size: 15px;">设计模式</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/springcloud微服务实战-学习笔记六-服务网关/">springcloud微服务实战 学习笔记六 服务网关</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/springcloud微服务实战-学习笔记三-服务消费者/">springcloud微服务实战  学习笔记三 服务消费者</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/冒泡排序java实现/">冒泡排序java实现</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/面试复习笔记三(sql)/">面试复习笔记三(sql)</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/springcloud微服务实战-学习笔记四-分布式配置中心/">springcloud微服务实战 学习笔记四 分布式配置中心</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/希尔排序java实现/">希尔排序java实现</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/java支付宝支付-即时到账/">java支付宝支付(即时到账)</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/从零开始netty学习笔记之BIO/">从零开始netty学习笔记之BIO</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/从零开始netty学习笔记之netty简单demo/">从零开始netty学习笔记之netty简单demo</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/09/26/springcloud微服务实战-学习笔记二-服务提供者/">springcloud微服务实战 学习笔记二 服务提供者</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="http://www.bejson.com/" title="www.bejson.com" target="_blank">www.bejson.com</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2018 <a href="/." rel="nofollow">maylor's blogs.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.3.5/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.3.5/jquery.fancybox.min.css"><script type="text/javascript" src="/js/search.js?v=0.0.0"></script><script>var search_path = 'search.xml';
+if (search_path.length == 0) {
+   search_path = 'search.xml';
+}
+var path = '/' + search_path;
+searchFunc(path, 'local-search-input', 'local-search-result');
+</script><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
